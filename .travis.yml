@@ -1,0 +1,11 @@
+language: python
+python:
+  - "pypy"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+
+install:
+  - BUILD_LIB=1 pip install .
+
+script: py.test
