@@ -16,6 +16,10 @@ You can find more information in the `documentation`_.
 .. image:: https://travis-ci.org/DinoTools/python-flextls.svg?branch=master
     :target: https://travis-ci.org/DinoTools/python-flextls
 
+.. image:: https://readthedocs.org/projects/python-flextls/badge/?version=latest
+    :target: https://readthedocs.org/projects/python-flextls/?badge=latest
+    :alt: Documentation Status
+
 Features
 --------
 
