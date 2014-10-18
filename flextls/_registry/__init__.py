@@ -39,11 +39,9 @@ class Registry(RegistryNamespace):
         self.register("version.TLSv12", 32)
 
 
-class TLSCipherSuiteRegistry(object):
-    def __init__(self, auto_load=True):
+class BaseCipherSuiteRegistry(object):
+    def __init__(self):
         self._cipher_suites = []
-        from flextls._registry.data import tls_cipher_suites
-        self.load(tls_cipher_suites, replace=True)
 
     def __iter__(self):
         return self._cipher_suites.__iter__()
@@ -113,6 +111,13 @@ class TLSCipherSuiteRegistry(object):
             self.append(
                 CipherSuite(**args)
             )
+
+
+class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
+    def __init__(self, auto_load=True):
+        if auto_load:
+            from flextls._registry.data import tls_cipher_suites
+            self.load(tls_cipher_suites, replace=True)
 
 
 class CipherSuite(object):
