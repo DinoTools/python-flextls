@@ -1,3 +1,8 @@
+from flextls._registry import Registry
+
+
+registry = Registry()
+
 class ConnectionState(object):
     def __init__(self):
         self.entity = None
