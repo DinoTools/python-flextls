@@ -45,14 +45,12 @@ class RecordSSLv2(Protocol):
         if isinstance(self.payload, Protocol):
             payload = self.payload.encode()
             for pay_pattern, pay_class in self.payload_list.items():
-                print(pay_pattern)
                 if isinstance(self.payload, pay_class):
                     self.type = pay_pattern
                     break
         elif self.payload is not None:
             payload = self.payload
 
-        print(self.type)
         data = struct.pack("!B", (self.type))
         data += payload
         data += self.padding

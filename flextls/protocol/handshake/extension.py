@@ -83,8 +83,6 @@ class SessionTicketTLS(Protocol):
 
     @classmethod
     def decode(cls, data, connection_state=None):
-        print("decode")
-        print(data)
         obj = cls(
             connection_state=connection_state
         )
