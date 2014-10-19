@@ -294,6 +294,11 @@ class CipherSuiteField(UShortField):
         UShortField.__init__(self, name, None)
 
 
+class SSLv2CipherSuiteField(UInteger3Field):
+    def __init__(self, name="unnamed"):
+        UInteger3Field.__init__(self, name, None)
+
+
 class CompressionMethodField(UByteField):
     def __init__(self, name="unnamed"):
         UByteField.__init__(self, name, None)

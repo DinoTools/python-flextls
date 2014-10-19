@@ -2,10 +2,11 @@
 The SSL/TLS Handshake Protocol
 """
 
-from flextls.field import UInteger3Field
+from flextls.field import UInteger3Field, UShortField, UByteField
 from flextls.field import UByteEnumField
 from flextls.field import VectorUByteField
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
+from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
 
 
@@ -134,3 +135,37 @@ class ClientKeyExchange(Protocol):
         return data
 
 Handshake.add_payload_type(16, ClientKeyExchange)
+
+
+class SSLv2ClientHello(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            VersionField("version"),
+            UShortField("cipher_suites_length", 0),
+            UShortField("session_id_length", 0),
+            UShortField("challenge_length", 0),
+        ]
+        self.cipher_suites = []
+        self.session_id = b""
+        self.challenge = b""
+
+    def dissect(self, data):
+        data = Protocol.dissect(self, data)
+        cipher_data = data[:self.cipher_suites_length]
+        data = data[self.cipher_suites_length:]
+        while len(cipher_data) > 0:
+            if len(cipher_data) < 3:
+                # ToDo: error
+                break
+            cipher = SSLv2CipherSuiteField()
+            cipher_data = cipher.dissect(cipher_data)
+            self.cipher_suites.append(cipher)
+
+        self.session_id = data[:self.session_id_length]
+        data = data[self.session_id_length:]
+        self.challenge = data[:self.challenge_length]
+        data = data[self.challenge_length:]
+
+        return data
