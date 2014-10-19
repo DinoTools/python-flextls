@@ -38,6 +38,45 @@ class RecordSSLv2(Protocol):
         self.padding = b""
         self.type = None
 
+    def assemble(self):
+        data = b""
+        payload = b""
+
+        if isinstance(self.payload, Protocol):
+            payload = self.payload.encode()
+            for pay_pattern, pay_class in self.payload_list.items():
+                print(pay_pattern)
+                if isinstance(self.payload, pay_class):
+                    self.type = pay_pattern
+                    break
+        elif self.payload is not None:
+            payload = self.payload
+
+        print(self.type)
+        data = struct.pack("!B", (self.type))
+        data += payload
+        data += self.padding
+
+        self.length = len(data)
+
+        # Is it 2 or 3 bytes header
+        if len(self.padding) > 0:
+            tmp = [0, 0, 0]
+            tmp[0] = (self.length >> 8) & 0x3f
+            tmp[1] = self.length & 0xff
+            tmp[2] = len(self.padding)
+            if self.is_escape == True:
+                tmp[0] = tmp[0] | 0x40
+            data = struct.pack("!BBB", *tmp) + data
+        else:
+            tmp = [0, 0]
+            tmp[0] = (self.length >> 8) & 0x7f
+            tmp[1] = self.length & 0xff
+            tmp[0] = tmp[0] | 0x80
+            data = struct.pack("!BB", *tmp) + data
+
+        return data
+
     def dissect(self, data):
         # Is it 2 or 3 bytes header
         if struct.unpack("!B", data[:1])[0] & 0x80 == 0:
