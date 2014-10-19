@@ -169,3 +169,41 @@ class SSLv2ClientHello(Protocol):
         data = data[self.challenge_length:]
 
         return data
+
+
+class SSLv2ServerHello(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            UByteField("session_id_hit", 0),
+            UByteField("certificate_type", 0),
+            VersionField("version"),
+            UShortField("certificate_length", 0),
+            UShortField("cipher_suites_length", 0),
+            UShortField("connection_id_length", 0),
+        ]
+        self.certificate = b""
+        self.cipher_suites = []
+        self.connection_id = b""
+
+    def dissect(self, data):
+        data = Protocol.dissect(self, data)
+
+        self.certificate = data[:self.certificate_length]
+        data = data[self.certificate_length:]
+
+        cipher_data = data[:self.cipher_suites_length]
+        data = data[self.cipher_suites_length:]
+        while len(cipher_data) > 0:
+            if len(cipher_data) < 3:
+                # ToDo: error
+                break
+            cipher = SSLv2CipherSuiteField()
+            cipher_data = cipher.dissect(cipher_data)
+            self.cipher_suites.append(cipher)
+
+        self.connection_id = data[:self.connection_id_length]
+        data = data[self.connection_id_length:]
+
+        return data
