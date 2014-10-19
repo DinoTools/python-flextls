@@ -32,6 +32,10 @@ class Registry(RegistryNamespace):
             "tls.cipher_suites",
             TLSCipherSuiteRegistry()
         )
+        self.register(
+            "sslv2.cipher_suites",
+            SSLv2CipherSuiteRegistry()
+        )
         self.register("version.SSLv2", 2)
         self.register("version.SSLv3", 4)
         self.register("version.TLSv10", 8)
@@ -111,6 +115,13 @@ class BaseCipherSuiteRegistry(object):
             self.append(
                 CipherSuite(**args)
             )
+
+
+class SSLv2CipherSuiteRegistry(BaseCipherSuiteRegistry):
+    def __init__(self, auto_load=True):
+        if auto_load:
+            from flextls._registry.data import ssl_cipher_suites
+            self.load(ssl_cipher_suites, replace=True)
 
 
 class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
