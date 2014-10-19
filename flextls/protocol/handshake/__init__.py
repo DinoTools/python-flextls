@@ -151,6 +151,26 @@ class SSLv2ClientHello(Protocol):
         self.session_id = b""
         self.challenge = b""
 
+    def assemble(self):
+        cipher_data = b""
+        for cipher in self.cipher_suites:
+            cipher_data = cipher_data + cipher.assemble()
+
+        if len(self.challenge) == 0:
+            # ToDo: error
+            pass
+
+        self.cipher_suites_length = len(cipher_data)
+        self.session_id_length = len(self.session_id)
+        self.challenge_length = len(self.challenge)
+
+        data = cipher_data
+        data += self.session_id
+        data += self.challenge
+
+        data = Protocol.assemble(self) + data
+        return data
+
     def dissect(self, data):
         data = Protocol.dissect(self, data)
         cipher_data = data[:self.cipher_suites_length]
