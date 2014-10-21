@@ -36,6 +36,10 @@ class Registry(RegistryNamespace):
             "sslv2.cipher_suites",
             SSLv2CipherSuiteRegistry()
         )
+        self.register(
+            "ec.named_curves",
+            ECNamedCurveRegistry()
+        )
         self.register("version.SSLv2", 2)
         self.register("version.SSLv3", 4)
         self.register("version.TLSv10", 8)
@@ -145,6 +149,15 @@ class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
             self.load(tls_cipher_suites, replace=True)
 
 
+class ECNamedCurveRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = ECNamedCurve
+        if auto_load:
+            from flextls._registry.data import ec_named_curves
+            self.load(ec_named_curves, replace=True)
+
+
 class CipherSuite(object):
     def __init__(self, id, protocol=None, name=None, bits=None, alg_bits=None,
                  key_exchange=None, authentication=None, encryption=None,
@@ -161,3 +174,11 @@ class CipherSuite(object):
         self.dtls = dtls
         self.references = references
         self.export = export
+
+
+class ECNamedCurve(object):
+    def __init__(self, id, name=None, dtls=None, references=None):
+        self.id = id
+        self.name = name
+        self.dtls = dtls
+        self.references = references
