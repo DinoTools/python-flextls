@@ -33,6 +33,10 @@ class Registry(RegistryNamespace):
             TLSCipherSuiteRegistry()
         )
         self.register(
+            "tls.hash_algorithms",
+            TLSHashAlgorithmRegistry()
+        )
+        self.register(
             "tls.signature_algorithms",
             TLSSignatureAlgorithmRegistry()
         )
@@ -153,6 +157,15 @@ class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
             self.load(tls_cipher_suites, replace=True)
 
 
+class TLSHashAlgorithmRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = TLSHashAlgorithm
+        if auto_load:
+            from flextls._registry.data import tls_hash_algorithms
+            self.load(tls_hash_algorithms, replace=True)
+
+
 class TLSSignatureAlgorithmRegistry(BaseRegistry):
     def __init__(self, auto_load=True):
         BaseRegistry.__init__(self)
@@ -195,6 +208,11 @@ class BaseRegistryItem(object):
         self.name = name
         self.dtls = dtls
         self.references = references
+
+
+class TLSHashAlgorithm(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
 
 
 class TLSSignatureAlgorithm(BaseRegistryItem):

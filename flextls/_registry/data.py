@@ -3515,6 +3515,51 @@ tls_cipher_suites = [
     },
 ]
 
+tls_hash_algorithms = [
+    {
+        "id": 0,
+        "name": "none",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 1,
+        "name": "md5",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 2,
+        "name": "sha1",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 3,
+        "name": "sha224",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 4,
+        "name": "sha256",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 5,
+        "name": "sha384",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 6,
+        "name": "sha512",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+]
+
 tls_signature_algorithms = [
     {
         "id": 0,
