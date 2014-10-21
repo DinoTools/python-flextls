@@ -3515,6 +3515,33 @@ tls_cipher_suites = [
     },
 ]
 
+tls_signature_algorithms = [
+    {
+        "id": 0,
+        "name": "anonymous",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 1,
+        "name": "rsa",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 2,
+        "name": "dsa",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 3,
+        "name": "ecdsa",
+        "dtls": True,
+        "references": ["RFC5246"],
+    },
+]
+
 ec_named_curves = [
     {
         "id": 1,

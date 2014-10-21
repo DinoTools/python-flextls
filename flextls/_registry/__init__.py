@@ -33,6 +33,10 @@ class Registry(RegistryNamespace):
             TLSCipherSuiteRegistry()
         )
         self.register(
+            "tls.signature_algorithms",
+            TLSSignatureAlgorithmRegistry()
+        )
+        self.register(
             "sslv2.cipher_suites",
             SSLv2CipherSuiteRegistry()
         )
@@ -149,6 +153,15 @@ class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
             self.load(tls_cipher_suites, replace=True)
 
 
+class TLSSignatureAlgorithmRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = ECNamedCurve
+        if auto_load:
+            from flextls._registry.data import tls_signature_algorithms
+            self.load(tls_signature_algorithms, replace=True)
+
+
 class ECNamedCurveRegistry(BaseRegistry):
     def __init__(self, auto_load=True):
         BaseRegistry.__init__(self)
@@ -176,9 +189,19 @@ class CipherSuite(object):
         self.export = export
 
 
-class ECNamedCurve(object):
+class BaseRegistryItem(object):
     def __init__(self, id, name=None, dtls=None, references=None):
         self.id = id
         self.name = name
         self.dtls = dtls
         self.references = references
+
+
+class TLSSignatureAlgorithm(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
+
+
+class ECNamedCurve(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
