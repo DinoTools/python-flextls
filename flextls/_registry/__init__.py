@@ -43,56 +43,77 @@ class Registry(RegistryNamespace):
         self.register("version.TLSv12", 32)
 
 
-class BaseCipherSuiteRegistry(object):
+class BaseRegistry(object):
     def __init__(self):
-        self._cipher_suites = []
+        self._values = []
+        self._arg_names = [
+            "id",
+            "name",
+            "dtls",
+            "references",
+        ]
+        self._item_cls = None
 
     def __iter__(self):
-        return self._cipher_suites.__iter__()
+        return self._values.__iter__()
 
-    def append(self, cipher_suite):
-        if self.get(cipher_suite.id) is not None:
+    def append(self, value):
+        if self.get(value.id) is not None:
             return
-        self._cipher_suites.append(cipher_suite)
+        self._values.append(value)
 
     def clear(self):
-        self._cipher_suites = []
+        self._values = []
 
     def get(self, id):
-        for cipher_suite in self._cipher_suites:
-            if cipher_suite.id == id:
-                return cipher_suite
+        for value in self._values:
+            if value.id == id:
+                return value
 
         # ToDo: return unknown?
         return None
 
     def get_dict(self):
         result = {}
-        for item in self._cipher_suites:
+        for item in self._values:
             result[item.id] = item
         return result
 
     def get_ids(self):
         result = []
-        for item in self._cipher_suites:
+        for item in self._values:
             result.append(item.id)
         return result
 
-
-    def load(self, cipher_suites, replace=False):
-        if replace == True:
+    def load(self, values, replace=False):
+        if replace is True:
             self.clear()
 
-        for args in cipher_suites:
+        for args in values:
             self.append(
                 CipherSuite(**args)
             )
 
-    def load_list(self, cipher_suites, replace=False):
-        if replace == True:
+    def load_list(self, values, replace=False):
+        if replace is True:
             self.clear()
 
-        arg_names = [
+        for row_values in values:
+            args = {}
+            for i, name in enumerate(self._arg_names):
+                if len(row_values) <= i:
+                    continue
+                args[name] = row_values[i]
+
+            self.append(
+                self._item_cls(**args)
+            )
+
+
+class BaseCipherSuiteRegistry(BaseRegistry):
+    def __init__(self):
+        BaseRegistry.__init__(self)
+        self._arg_names = [
             "id",
             "name",
             "protocol",
@@ -105,20 +126,12 @@ class BaseCipherSuiteRegistry(object):
             "dtls",
             "export"
         ]
-        for values in cipher_suites:
-            args = {}
-            for i, name in enumerate(arg_names):
-                if len(values) <= i:
-                    continue
-                args[name] = values[i]
-
-            self.append(
-                CipherSuite(**args)
-            )
+        self._item_cls = CipherSuite
 
 
 class SSLv2CipherSuiteRegistry(BaseCipherSuiteRegistry):
     def __init__(self, auto_load=True):
+        BaseCipherSuiteRegistry.__init__(self)
         if auto_load:
             from flextls._registry.data import ssl_cipher_suites
             self.load(ssl_cipher_suites, replace=True)
@@ -126,6 +139,7 @@ class SSLv2CipherSuiteRegistry(BaseCipherSuiteRegistry):
 
 class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
     def __init__(self, auto_load=True):
+        BaseCipherSuiteRegistry.__init__(self)
         if auto_load:
             from flextls._registry.data import tls_cipher_suites
             self.load(tls_cipher_suites, replace=True)
