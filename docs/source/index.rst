@@ -20,6 +20,13 @@ Contents:
    introduction
    changelog
 
+API Documentation
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   api/exception
 
 Indices and tables
 ==================
