@@ -2,6 +2,8 @@ FlexTLS
 =======
 
 FlexTLS is an open source SSL and TLS python library.
+It is designed to be used in SSL/TLS scanners and similar applications.
+It must not be used as standalone crypto library.
 
 You can find more information in the `documentation`_.
 
@@ -23,17 +25,22 @@ You can find more information in the `documentation`_.
 Features
 --------
 
-* Supported cryptographic protocols: SSLv3, TLS 1.0, TLS 1.1 and TLS 1.2
+* Supported cryptographic protocols: SSLv2, SSLv3, TLS 1.0, TLS 1.1 and TLS 1.2
+* Decode and encode SSL/TLS records
 
 
 Install
 -------
 
-Requirements:
+**Requirements:**
 
-* Python >= 3.2
+* Python 2.6/2.7 or Python >= 3.2
+* Python packages:
 
-Install:
+  * six >= 1.4.1
+
+
+**Install:**
 
 .. code-block:: console
 
