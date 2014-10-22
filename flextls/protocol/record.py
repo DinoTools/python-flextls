@@ -3,6 +3,7 @@ The SSL/TLS Record Protocol
 """
 import struct
 
+import six
 
 from flextls.field import UByteEnumField, UShortField, VersionField
 from flextls.protocol import Protocol
@@ -15,11 +16,11 @@ from flextls.protocol.heartbeat import Heartbeat
 class Record(Protocol):
     @classmethod
     def decode(cls, data, connection_state=None):
-        if data[3] == 0x00 and data[4] == 0x02:
+        if six.indexbytes(data, 3) == 0x00 and six.indexbytes(data, 4) == 0x02:
             obj = RecordSSLv2(
                 connection_state=connection_state
             )
-        elif data[1] == 0x03:
+        elif six.indexbytes(data, 1) == 0x03:
             obj = RecordSSLv3(
                 connection_state=connection_state
             )
