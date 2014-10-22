@@ -1,6 +1,23 @@
 import binascii
 
-from flextls.protocol.record import Record
+import pytest
+
+from flextls.exception import NotEnoughData
+from flextls.protocol.record import Record, RecordSSLv3
+
+
+class TestSSLv3(object):
+    def test_empty_data(self):
+        with pytest.raises(NotEnoughData):
+            RecordSSLv3().decode(b"")
+
+    def test_not_enough_data(self):
+        # Handshake, SSLv3.0, Length 136
+        data = binascii.unhexlify(b"1603000088")
+        with pytest.raises(NotEnoughData):
+            RecordSSLv3().decode(data)
+        #
+        assert binascii.hexlify(data) == b"1603000088"
 
 
 class TestClientHello(object):

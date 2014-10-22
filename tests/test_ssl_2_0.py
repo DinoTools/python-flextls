@@ -1,6 +1,23 @@
 import binascii
 
+import pytest
+
+from flextls.exception import NotEnoughData
 from flextls.protocol.record import Record, RecordSSLv2
+
+
+class TestSSLv2(object):
+    def test_empty_data(self):
+        with pytest.raises(NotEnoughData):
+            RecordSSLv2().decode(b"")
+
+    def test_not_enough_data(self):
+        # Length: 46, Client Hello
+        data = binascii.unhexlify(b"802e01")
+        with pytest.raises(NotEnoughData):
+            RecordSSLv2().decode(data)
+        #
+        assert binascii.hexlify(data) == b"802e01"
 
 
 class TestClientHello(object):
