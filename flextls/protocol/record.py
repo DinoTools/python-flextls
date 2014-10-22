@@ -5,6 +5,7 @@ import struct
 
 import six
 
+from flextls.exception import NotEnoughData
 from flextls.field import UByteEnumField, UShortField, VersionField
 from flextls.protocol import Protocol
 from flextls.protocol.alert import Alert
@@ -16,6 +17,9 @@ from flextls.protocol.heartbeat import Heartbeat
 class Record(Protocol):
     @classmethod
     def decode(cls, data, connection_state=None):
+        if len(data) < 4:
+            raise NotEnoughData("Not enough data to decode header")
+
         if six.indexbytes(data, 3) == 0x00 and six.indexbytes(data, 4) == 0x02:
             obj = RecordSSLv2(
                 connection_state=connection_state
@@ -77,6 +81,9 @@ class RecordSSLv2(Protocol):
         return data
 
     def dissect(self, data):
+        if len(data) < 2:
+            raise NotEnoughData("Not enough data to decode header")
+
         # Is it 2 or 3 bytes header
         if struct.unpack("!B", data[:1])[0] & 0x80 == 0:
             tmp = struct.unpack("!BBB", data[:3])
@@ -88,6 +95,9 @@ class RecordSSLv2(Protocol):
             tmp = struct.unpack("!BB", data[:2])
             data = data[2:]
             self.length = ((tmp[0] & 0x7f) << 8) | tmp[1]
+
+        if len(data) == 0:
+            raise NotEnoughData("Not enough data to decode header")
 
         self.type = struct.unpack("!B", data[:1])[0]
         data = data[1:]

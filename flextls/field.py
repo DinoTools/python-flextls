@@ -1,5 +1,7 @@
 import struct
 
+from flextls.exception import NotEnoughData
+
 
 class Field(object):
     def __init__(self, name, default, fmt="H"):
@@ -19,6 +21,11 @@ class Field(object):
         return struct.pack(self.fmt, self.value)
 
     def dissect(self, data):
+        if len(data) < self.size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
         self.value = struct.unpack(self.fmt, data[:self.size])[0]
         return data[self.size:]
 
@@ -44,6 +51,11 @@ class UInteger3Field(Field):
         return struct.pack(self.fmt, *value)
 
     def dissect(self, data):
+        if len(data) < self.size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
         tmp = struct.unpack(self.fmt, data[:self.size])
         self.value = (tmp[0] * (2 ** 16)) + tmp[1]
         return data[self.size:]
@@ -88,12 +100,23 @@ class VectorListBaseField(object):
 
     def dissect(self, data):
         len_size = struct.calcsize(self.fmt)
+
+        if len(data) < len_size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
 #        print(self.name)
 #        print(len_size)
 #        print(data)
         payload_size = struct.unpack(self.fmt, data[:len_size])[0]
 #        print(payload_size)
         data = data[len_size:]
+
+        if len(data) < payload_size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
         payload_data = data[:payload_size]
         while len(payload_data) > 0:
             item = self.item_class()
@@ -179,6 +202,12 @@ class VectorBaseField(object):
 
     def dissect(self, data):
         len_size = struct.calcsize(self.fmt)
+
+        if len(data) < len_size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
         value_size = struct.unpack(self.fmt, data[:len_size])[0]
         data = data[len_size:]
         self.value = data[:value_size]
