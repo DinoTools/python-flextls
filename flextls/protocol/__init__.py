@@ -123,7 +123,7 @@ class Protocol(object):
         for field in self.fields:
             if field.name == name:
                 return field
-        return None
+        raise AttributeError(name)
 
     def get_field_value(self, name):
         for field in self.fields:
