@@ -82,7 +82,7 @@ class ServerHello(Protocol):
 Handshake.add_payload_type(2, ServerHello)
 
 
-class Certificate(Protocol):
+class ServerCertificate(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -94,7 +94,7 @@ class Certificate(Protocol):
         data = Protocol.dissect(self, data)
         return data
 
-Handshake.add_payload_type(11, Certificate)
+Handshake.add_payload_type(11, ServerCertificate)
 
 
 class ServerKeyExchange(Protocol):
