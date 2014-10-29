@@ -3515,6 +3515,27 @@ tls_cipher_suites = [
     },
 ]
 
+tls_compression_methods = [
+    {
+        "id": 0,
+        "name": "none",
+        "dtls": None,
+        "references": ["RFC5246"],
+    },
+    {
+        "id": 1,
+        "name": "DEFLATE",
+        "dtls": None,
+        "references": ["RFC3749"],
+    },
+    {
+        "id": 64,
+        "name": "LZS",
+        "dtls": None,
+        "references": ["RFC3943"],
+    },
+]
+
 tls_hash_algorithms = [
     {
         "id": 0,

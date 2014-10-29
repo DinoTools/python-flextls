@@ -33,6 +33,10 @@ class Registry(RegistryNamespace):
             TLSCipherSuiteRegistry()
         )
         self.register(
+            "tls.compression_methods",
+            TLSCompressionMethodRegistry()
+        )
+        self.register(
             "tls.hash_algorithms",
             TLSHashAlgorithmRegistry()
         )
@@ -157,6 +161,15 @@ class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
             self.load(tls_cipher_suites, replace=True)
 
 
+class TLSCompressionMethodRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = TLSCompressionMethod
+        if auto_load:
+            from flextls._registry.data import tls_compression_methods
+            self.load(tls_compression_methods, replace=True)
+
+
 class TLSHashAlgorithmRegistry(BaseRegistry):
     def __init__(self, auto_load=True):
         BaseRegistry.__init__(self)
@@ -208,6 +221,11 @@ class BaseRegistryItem(object):
         self.name = name
         self.dtls = dtls
         self.references = references
+
+
+class TLSCompressionMethod(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
 
 
 class TLSHashAlgorithm(BaseRegistryItem):
