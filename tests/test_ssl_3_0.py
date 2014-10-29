@@ -244,6 +244,14 @@ class TestCertificate(object):
         record = self._get_record()
         assert record.payload.length == 841
 
+    def test_certificate_count(self):
+        record = self._get_record()
+        assert len(record.payload.payload.certificate_list) == 1
+
+    def test_certificate_count(self):
+        record = self._get_record()
+        assert len(record.payload.payload.certificate_list[0].value) == 835
+
 
 class TestServerKeyExchange(object):
 
