@@ -5,6 +5,7 @@ from flextls.protocol import Protocol
 from flextls.field import UShortField, VectorUShortField
 from flextls.field import UByteEnumField, UShortEnumField, VectorListUShortField
 from flextls.field import SignatureAndHashAlgorithmField
+from flextls.field import ServerNameListField
 
 
 class Extension(Protocol):
@@ -27,6 +28,33 @@ class Extension(Protocol):
     def dissect(self, data):
         data = Protocol.dissect(self, data)
         return data
+
+
+class ServerNameIndication(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            ServerNameListField("server_name_list"),
+        ]
+
+    @classmethod
+    def decode(cls, data, connection_state=None):
+        obj = cls(
+            connection_state=connection_state
+        )
+        if len(data) > 0:
+            data = obj.dissect(data)
+
+        return (obj, data)
+
+    def encode(self):
+        if len(self.server_name_list) == 0:
+            return b""
+        else:
+            return self.assemble()
+
+
+Extension.add_payload_type(0x0000, ServerNameIndication)
 
 
 class Heartbeat(Protocol):

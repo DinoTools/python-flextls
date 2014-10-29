@@ -202,6 +202,15 @@ class CipherSuitesField(VectorListUShortField):
         )
 
 
+class ServerNameListField(VectorListUShortField):
+    def __init__(self, name):
+        VectorListUShortField.__init__(
+            self,
+            name,
+            ServerNameField,
+        )
+
+
 class ExtensionsField(VectorListUShortField):
     def __init__(self, name):
         from flextls.protocol.handshake.extension import Extension
@@ -232,7 +241,7 @@ class CompressionMethodsField(VectorListUByteField):
 
 
 class VectorBaseField(object):
-    def __init__(self, name, default=b"", fmt="H"):
+    def __init__(self, name, default=b"", fmt="H", connection_state=None):
         self.name = name
         self.value = default
         if fmt[0] in "@=<>!":
@@ -314,16 +323,17 @@ class CertificateField(VectorInteger3Field):
 
 
 class MultiPartField(object):
-    def __init__(self, name, fields):
+    payload_list = None
+
+    def __init__(self, name, fields=[]):
         self.fields = []
         self.name = name
         self.fields = fields
+        self.payload_identifier_field = None
+        self.payload_length_field = None
 
     def __getattr__(self, name):
-        for field in self.fields:
-            if field.name == name:
-                return field.value
-        raise AttributeError
+        return self.get_field_value(name)
 
     def __setattr__(self, name, value):
         if name == "fields":
@@ -337,16 +347,72 @@ class MultiPartField(object):
 
         object.__setattr__(self, name, value)
 
+    @classmethod
+    def add_payload_type(cls, pattern, payload_class):
+        if cls.payload_list is None:
+            cls.payload_list = {}
+        cls.payload_list[pattern] = payload_class
+
     def assemble(self):
         data = b""
+        payload = b""
+        if not isinstance(self.payload, bytes) and self.payload is not None:
+            payload = self.payload.assemble()
+            if self.payload_identifier_field is not None:
+                for pay_pattern, pay_class in self.payload_list.items():
+                    if isinstance(self.payload, pay_class):
+                        self.set_field_value(
+                            self.payload_identifier_field,
+                            pay_pattern
+                        )
+                        break
+        elif self.payload is not None:
+            payload = self.payload
+
+        if self.payload_length_field is not None and payload is not None:
+            self.set_field_value(
+                self.payload_length_field,
+                len(payload)
+            )
+
         for field in self.fields:
+#            print(self)
 #            print(field)
+#            print(field.name)
             data = data + field.assemble()
+
+        data = data + payload
         return data
 
     def dissect(self, data):
         for field in self.fields:
             data = field.dissect(data)
+
+        # print(self.payload_identifier_field)
+        # print(self.payload_length_field)
+        if self.payload_identifier_field is not None:
+            if self.payload_length_field is None:
+                payload_data = data
+                data = data[:0]
+            else:
+                payload_length = self.get_field_value(self.payload_length_field)
+                payload_data = data[:payload_length]
+                data = data[payload_length:]
+
+            #print(payload_length)
+            payload_class = None
+            if self.payload_list is not None:
+                payload_class = self.payload_list.get(
+                    self.get_field_value(self.payload_identifier_field),
+                    None
+                )
+            if payload_class is None:
+                self.payload = payload_data
+            else:
+                obj = payload_class("onknown")
+                payload_data = obj.dissect(payload_data)
+                self.payload = obj
+
         return data
 
     def get_field_value(self, name):
@@ -354,9 +420,37 @@ class MultiPartField(object):
             if field.name == name:
                 return field.value
 
+    def set_field_value(self, name, value):
+        for field in self.fields:
+            if field.name == name:
+                field.value = value
+
     @property
     def value(self):
         return self
+
+
+class ServerNameField(MultiPartField):
+    def __init__(self, name="test", **kwargs):
+        MultiPartField.__init__(self, name, **kwargs)
+        self.fields = [
+            UByteEnumField(
+                "name_type",
+                None,
+                {
+                    0: "host_name",
+                    255: None
+                }
+            ),
+        ]
+        self.payload_identifier_field = "name_type"
+
+
+class HostNameField(VectorUShortField):
+    pass
+
+
+ServerNameField.add_payload_type(0, HostNameField)
 
 
 class VersionField(MultiPartField):
