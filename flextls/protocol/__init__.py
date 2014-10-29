@@ -108,7 +108,7 @@ class Protocol(object):
             if payload_class is None:
                 self.payload = payload_data
             else:
-                (obj, data) = payload_class.decode(
+                (obj, payload_data) = payload_class.decode(
                     payload_data,
                     connection_state=self._connection_state
                 )
