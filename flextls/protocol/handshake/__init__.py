@@ -6,6 +6,7 @@ from flextls.field import UInteger3Field, UShortField, UByteField
 from flextls.field import UByteEnumField
 from flextls.field import VectorUByteField
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
+from flextls.field import CertificateListField
 from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
 
@@ -86,7 +87,7 @@ class Certificate(Protocol):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
-            # ToDo: add certificate field
+            CertificateListField("certificate_list"),
         ]
 
     def dissect(self, data):

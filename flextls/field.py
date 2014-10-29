@@ -147,6 +147,52 @@ class VectorListUShortField(VectorListBaseField):
         VectorListBaseField.__init__(self, name, item_class, fmt="H")
 
 
+class VectorListInteger3Field(VectorListBaseField):
+    def __init__(self, name, item_class=None):
+        VectorListBaseField.__init__(self, name, item_class, fmt="BH")
+
+    def assemble(self):
+        data = b""
+        for item in self.items:
+            data = data + item.assemble()
+
+        value = (int(self.value / (2**16)), int(self.value % (2**16)))
+        return struct.pack(self.fmt, *value) + data
+
+    def dissect(self, data):
+        if len(data) < self.size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        tmp = struct.unpack(self.fmt, data[:self.size])
+        payload_length = (tmp[0] * (2 ** 16)) + tmp[1]
+        data = data[self.size:]
+
+
+        if len(data) < payload_length:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        payload_data = data[:payload_length]
+        while len(payload_data) > 0:
+            item = self.item_class()
+            payload_data = item.dissect(payload_data)
+            self.items.append(item)
+
+        return data[payload_length:]
+
+
+class CertificateListField(VectorListInteger3Field):
+    def __init__(self, name):
+        VectorListInteger3Field.__init__(
+            self,
+            name,
+            CertificateField,
+        )
+
+
 class CipherSuitesField(VectorListUShortField):
     def __init__(self, name):
         VectorListUShortField.__init__(
@@ -229,6 +275,39 @@ class VectorUShortField(VectorBaseField):
 class VectorUByteField(VectorBaseField):
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="B")
+
+
+class VectorInteger3Field(VectorBaseField):
+    def __init__(self, name):
+        VectorBaseField.__init__(self, name, fmt="BH")
+
+    def assemble(self):
+        data_length = len(self.value)
+        len_value = (int(data_length / (2**16)), int(data_length % (2**16)))
+        return struct.pack(self.fmt, *len_value) + self.value
+
+    def dissect(self, data):
+        if len(data) < self.size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        tmp = struct.unpack(self.fmt, data[:self.size])
+        data_length = (tmp[0] * (2 ** 16)) + tmp[1]
+        data = data[self.size:]
+
+        if len(data) < data_length:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        self.value = data[:data_length]
+        return data[data_length:]
+
+
+class CertificateField(VectorInteger3Field):
+    def __init__(self, name="certificate"):
+        VectorInteger3Field.__init__(self, name)
 
 
 ## Multipart
