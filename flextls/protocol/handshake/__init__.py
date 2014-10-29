@@ -109,7 +109,7 @@ class ServerKeyExchange(Protocol):
         data = Protocol.dissect(self, data)
         return data
 
-Handshake.add_payload_type(12, Certificate)
+Handshake.add_payload_type(12, ServerKeyExchange)
 
 
 class ServerHelloDone(Protocol):
