@@ -25,10 +25,6 @@ class Extension(Protocol):
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
-
 
 class ServerNameIndication(Protocol):
     def __init__(self, **kwargs):
@@ -38,7 +34,7 @@ class ServerNameIndication(Protocol):
         ]
 
     @classmethod
-    def decode(cls, data, connection_state=None):
+    def decode(cls, data, connection_state=None, payload_auto_decode=True):
         obj = cls(
             connection_state=connection_state
         )
@@ -110,7 +106,7 @@ class SessionTicketTLS(Protocol):
         ]
 
     @classmethod
-    def decode(cls, data, connection_state=None):
+    def decode(cls, data, connection_state=None, payload_auto_decode=True):
         obj = cls(
             connection_state=connection_state
         )

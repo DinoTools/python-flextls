@@ -16,7 +16,7 @@ from flextls.protocol.heartbeat import Heartbeat
 
 class Record(Protocol):
     @classmethod
-    def decode(cls, data, connection_state=None):
+    def decode(cls, data, connection_state=None, payload_auto_decode=True):
         if len(data) < 4:
             raise NotEnoughData("Not enough data to decode header")
 
@@ -80,7 +80,7 @@ class RecordSSLv2(Protocol):
 
         return data
 
-    def dissect(self, data):
+    def dissect(self, data, payload_auto_decode=True):
         if len(data) < 2:
             raise NotEnoughData("Not enough data to decode header")
 
@@ -105,14 +105,15 @@ class RecordSSLv2(Protocol):
         payload_class = self.payload_list.get(
             self.type,
             None
-        )
+         )
 
-        if payload_class is None:
+        if payload_class is None or payload_auto_decode is False:
             self.payload = data
         else:
             (obj, data) = payload_class.decode(
                 data,
-                connection_state=self._connection_state
+                connection_state=self._connection_state,
+                payload_auto_decode=payload_auto_decode
             )
             self.payload = obj
 
@@ -140,11 +141,6 @@ class RecordSSLv3(Protocol):
         ]
         self.payload_identifier_field = "content_type"
         self.payload_length_field = "length"
-
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-
-        return data
 
 
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)

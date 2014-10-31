@@ -2,6 +2,8 @@
 The SSL/TLS Protocol
 """
 
+from flextls.exception import NotEnoughData
+
 
 class Protocol(object):
     payload_list = None
@@ -71,21 +73,22 @@ class Protocol(object):
         return data
 
     @classmethod
-    def decode(cls, data, connection_state=None):
+    def decode(cls, data, connection_state=None, payload_auto_decode=True):
         obj = cls(
             connection_state=connection_state
         )
-        data = obj.dissect(data)
+        data = obj.dissect(
+            data,
+            payload_auto_decode=payload_auto_decode
+        )
         return (obj, data)
 
-    def dissect(self, data, connection_state=None):
-        if connection_state is not None:
-            self._connection_state = connection_state
-        # print(">>>")
-        # print(self)
-        # print(data)
-        for field in self.fields:
-            data = field.dissect(data)
+    def decode_payload(self, data=None, payload_auto_decode=True):
+        if data is None:
+            data = self.payload
+
+        if data is None:
+            return False
 
         # print(self.payload_identifier_field)
         # print(self.payload_length_field)
@@ -95,24 +98,45 @@ class Protocol(object):
                 data = data[:0]
             else:
                 payload_length = self.get_field_value(self.payload_length_field)
+                if len(data) < payload_length:
+                    raise NotEnoughData(
+                        "Not enough data to decode payload"
+                    )
                 payload_data = data[:payload_length]
                 data = data[payload_length:]
 
-            #print(payload_length)
             payload_class = None
             if self.payload_list is not None:
                 payload_class = self.payload_list.get(
                     self.get_field_value(self.payload_identifier_field),
                     None
                 )
-            if payload_class is None:
+
+            if payload_class is None or payload_auto_decode is False:
                 self.payload = payload_data
             else:
                 (obj, payload_data) = payload_class.decode(
                     payload_data,
-                    connection_state=self._connection_state
+                    connection_state=self._connection_state,
+                    payload_auto_decode=payload_auto_decode
                 )
                 self.payload = obj
+
+        return data
+
+    def dissect(self, data, connection_state=None, payload_auto_decode=True):
+        if connection_state is not None:
+            self._connection_state = connection_state
+        # print(">>>")
+        # print(self)
+        # print(data)
+        for field in self.fields:
+            data = field.dissect(data)
+
+        data = self.decode_payload(
+            data,
+            payload_auto_decode=payload_auto_decode
+        )
 
         return data
 

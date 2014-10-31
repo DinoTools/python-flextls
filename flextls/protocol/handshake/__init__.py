@@ -37,11 +37,6 @@ class Handshake(Protocol):
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
-
-
 class ClientHello(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
@@ -54,10 +49,6 @@ class ClientHello(Protocol):
             CompressionMethodsField("compression_methods"),
             ExtensionsField("extensions"),
         ]
-
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
 
 Handshake.add_payload_type(1, ClientHello)
 
@@ -75,10 +66,6 @@ class ServerHello(Protocol):
             ExtensionsField("extensions"),
         ]
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
-
 Handshake.add_payload_type(2, ServerHello)
 
 
@@ -89,10 +76,6 @@ class ServerCertificate(Protocol):
         self.fields = [
             CertificateListField("certificate_list"),
         ]
-
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
 
 Handshake.add_payload_type(11, ServerCertificate)
 
@@ -105,10 +88,6 @@ class ServerKeyExchange(Protocol):
             # ToDo: need a state object to parse the server params
         ]
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
-
 Handshake.add_payload_type(12, ServerKeyExchange)
 
 
@@ -118,10 +97,6 @@ class ServerHelloDone(Protocol):
         self.payload = None
         self.fields = []
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
-
 Handshake.add_payload_type(14, ServerHelloDone)
 
 
@@ -130,10 +105,6 @@ class ClientKeyExchange(Protocol):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = []
-
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
 
 Handshake.add_payload_type(16, ClientKeyExchange)
 
@@ -172,8 +143,12 @@ class SSLv2ClientHello(Protocol):
         data = Protocol.assemble(self) + data
         return data
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
+    def dissect(self, data, payload_auto_decode=True):
+        data = Protocol.dissect(
+            self,
+            data,
+            payload_auto_decode=payload_auto_decode
+        )
         cipher_data = data[:self.cipher_suites_length]
         data = data[self.cipher_suites_length:]
         while len(cipher_data) > 0:
@@ -208,8 +183,12 @@ class SSLv2ServerHello(Protocol):
         self.cipher_suites = []
         self.connection_id = b""
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
+    def dissect(self, data, payload_auto_decode=True):
+        data = Protocol.dissect(
+            self,
+            data,
+            payload_auto_decode=payload_auto_decode
+        )
 
         self.certificate = data[:self.certificate_length]
         data = data[self.certificate_length:]

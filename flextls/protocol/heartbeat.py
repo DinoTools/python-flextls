@@ -26,7 +26,11 @@ class Heartbeat(Protocol):
         data = data + self.padding
         return data
 
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
+    def dissect(self, data, payload_auto_decode=True):
+        data = Protocol.dissect(
+            self,
+            data,
+            payload_auto_decode=payload_auto_decode
+        )
         self.padding = data
         return b""

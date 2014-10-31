@@ -48,7 +48,3 @@ class Alert(Protocol):
                 }
             ),
         ]
-
-    def dissect(self, data):
-        data = Protocol.dissect(self, data)
-        return data
