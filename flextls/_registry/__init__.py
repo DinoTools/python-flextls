@@ -107,7 +107,7 @@ class BaseRegistry(object):
 
         for args in values:
             self.append(
-                CipherSuite(**args)
+                self._item_cls(**args)
             )
 
     def load_list(self, values, replace=False):
