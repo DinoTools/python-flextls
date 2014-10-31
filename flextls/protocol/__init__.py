@@ -154,6 +154,16 @@ class Protocol(object):
             if field.name == name:
                 return field.value
 
+    def get_payload_pattern(self, payload_cls):
+        for pay_pattern, pay_class in self.payload_list.items():
+            if issubclass(payload_cls, pay_class):
+                return pay_pattern
+            if isinstance(payload_cls, pay_class):
+                return pay_pattern
+
+        # ToDo: Change exception type?
+        raise Exception("Payload pattern not found")
+
     def set_field_value(self, name, value):
         for field in self.fields:
             if field.name == name:
