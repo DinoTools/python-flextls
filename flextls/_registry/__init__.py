@@ -135,7 +135,7 @@ class BaseCipherSuiteRegistry(BaseRegistry):
             "protocol",
             "bits",
             "alg_bits",
-            "key_exchagne",
+            "key_exchange",
             "authentication",
             "encryption",
             "mac",
