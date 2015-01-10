@@ -101,9 +101,12 @@ class UShortEnumField(EnumField):
 
 
 class VectorListBaseField(object):
-    def __init__(self, name, item_class=None, fmt="H"):
+    def __init__(self, name, item_class=None, item_class_args=None, fmt="H"):
         self.name = name
         self.item_class = item_class
+        if item_class_args is None:
+            item_class_args = []
+        self.item_class_args = item_class_args
         self.items = []
         if fmt[0] in "@=<>!":
             self.fmt = fmt
@@ -137,7 +140,7 @@ class VectorListBaseField(object):
 
         payload_data = data[:payload_size]
         while len(payload_data) > 0:
-            item = self.item_class()
+            item = self.item_class(*self.item_class_args)
             payload_data = item.dissect(payload_data)
             self.items.append(item)
 
@@ -156,18 +159,18 @@ class VectorListBaseField(object):
 
 
 class VectorListUByteField(VectorListBaseField):
-    def __init__(self, name, item_class=None):
-        VectorListBaseField.__init__(self, name, item_class, fmt="B")
+    def __init__(self, name, item_class=None, item_class_args=None):
+        VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="B")
 
 
 class VectorListUShortField(VectorListBaseField):
-    def __init__(self, name, item_class=None):
-        VectorListBaseField.__init__(self, name, item_class, fmt="H")
+    def __init__(self, name, item_class=None, item_class_args=None):
+        VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="H")
 
 
 class VectorListInteger3Field(VectorListBaseField):
-    def __init__(self, name, item_class=None):
-        VectorListBaseField.__init__(self, name, item_class, fmt="BH")
+    def __init__(self, name, item_class=None, item_class_args=None):
+        VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="BH")
 
     def assemble(self):
         data = b""
