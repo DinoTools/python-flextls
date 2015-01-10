@@ -138,6 +138,7 @@ class ServerCertificate(Protocol):
             CertificateListField("certificate_list"),
         ]
 
+DTLSv10Handshake.add_payload_type(11, ServerCertificate)
 Handshake.add_payload_type(11, ServerCertificate)
 
 
