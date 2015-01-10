@@ -59,6 +59,18 @@ class DTLSv10ClientHello(Protocol):
 DTLSv10Handshake.add_payload_type(1, DTLSv10ClientHello)
 
 
+class DTLSv10HelloVerifyRequest(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            VersionField("version"),
+            VectorUByteField("cookie")
+        ]
+
+DTLSv10Handshake.add_payload_type(3, DTLSv10HelloVerifyRequest)
+
+
 class Handshake(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
