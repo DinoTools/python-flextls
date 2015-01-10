@@ -42,6 +42,23 @@ class DTLSv10Handshake(Protocol):
         self.payload_length_field = "length"
 
 
+class DTLSv10ClientHello(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            VersionField("version"),
+            RandomField("random"),
+            VectorUByteField("session_id"),
+            VectorUByteField("cookie"),
+            CipherSuitesField("cipher_suites"),
+            CompressionMethodsField("compression_methods"),
+            ExtensionsField("extensions"),
+        ]
+
+DTLSv10Handshake.add_payload_type(1, DTLSv10ClientHello)
+
+
 class Handshake(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
