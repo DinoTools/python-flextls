@@ -126,6 +126,7 @@ class ServerHello(Protocol):
             ExtensionsField("extensions"),
         ]
 
+DTLSv10Handshake.add_payload_type(2, ServerHello)
 Handshake.add_payload_type(2, ServerHello)
 
 
