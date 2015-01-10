@@ -61,10 +61,9 @@ class TestClientHello(object):
         assert record.payload.length == 193
 
         # Client Hello
-        """
         client_hello = record.payload.payload
-        assert client_hello.version.major == 3
-        assert client_hello.version.minor == 0
+        assert client_hello.version.major == 254
+        assert client_hello.version.minor == 255
 
         assert len(client_hello.random.random_bytes) == 32
 
@@ -73,4 +72,3 @@ class TestClientHello(object):
         assert len(client_hello.cipher_suites) == 39
 
         assert len(client_hello.compression_methods) == 1
-        """
