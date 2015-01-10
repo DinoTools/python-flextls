@@ -173,3 +173,54 @@ class TestHelloVerifyRequest(object):
         assert hello_verify.version.minor == 255
 
         assert len(hello_verify.cookie) == 20
+
+
+class TestServerHello(object):
+    def test_pkg1(self):
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 1, Length 74
+
+        data = b"16feff0000000000000001004a"
+        # Server Hello, Length 62, Message Sequence 1, Fragment Offset 0, Fragment Length 62
+        data += b"0200003e000100000000003e"
+        # DTLS 1.0
+        data += b"feff"
+        # Random
+        data += b"0904c079eaf6fc8ccbb345bf1b279158d0127ec87bc2cf971c6c94ac42d1abd8"
+        # Session ID Length 0, Cipher Suite: TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (0xc014), Compression Method: null (0)
+        data += b"00c01400"
+        # Extensions, Length 22
+        data += b"0016ff01000100000b0004030001020023000000"
+        data += b"0f000101"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.epoch == 0
+        assert record.sequence_number == 1
+        assert record.length == 74
+
+        # Handshake
+        handshake = record.payload
+        assert handshake.type == 2
+        assert handshake.length == 62
+        assert handshake.message_seq == 1
+        assert handshake.fragment_offset == 0
+        assert handshake.fragment_length == 62
+
+        # Server Hello
+        server_hello = record.payload.payload
+        assert server_hello.version.major == 254
+        assert server_hello.version.minor == 255
+
+        assert len(server_hello.random.random_bytes) == 32
+
+        assert len(server_hello.session_id) == 0
+
+        # ToDo: test cipher suite and compression
+
+        assert len(server_hello.extensions) == 4
