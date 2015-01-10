@@ -20,6 +20,65 @@ class TestDTLSv10(object):
         assert binascii.hexlify(data) == b"16feff000000000000000000cd"
 
 
+class TestCertificate(object):
+    def test_pkg1(self):
+
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 2, Length 696
+        data = b"16feff000000000000000202b8"
+        # Certificate, Length 684, Message Sequence 2, Fragment Offset 0, Fragment Length 684
+        data += b"0b0002ac00020000000002ac"
+        # Certificate Length: 681, Certificate Data
+        data += b"0002a90002a6308202a23082020ba003020102020900e8ffa7c3bdac30"
+        data += b"81300d06092a864886f70d0101050500306a310b300906035504061302"
+        data += b"44453110300e06035504080c075361636873656e31143012060355040a"
+        data += b"0c0b4578616d706c6520496e633112301006035504030c096c6f63616c"
+        data += b"686f7374311f301d06092a864886f70d01090116106365727440657861"
+        data += b"6d706c652e6f7267301e170d3135303131303037333733345a170d3136"
+        data += b"303131303037333733345a306a310b3009060355040613024445311030"
+        data += b"0e06035504080c075361636873656e31143012060355040a0c0b457861"
+        data += b"6d706c6520496e633112301006035504030c096c6f63616c686f737431"
+        data += b"1f301d06092a864886f70d010901161063657274406578616d706c652e"
+        data += b"6f726730819f300d06092a864886f70d010101050003818d0030818902"
+        data += b"818100a742a7933fd1877d8596a8c99d36009502ce0e6bea07b5b2de31"
+        data += b"bd39a62177475ed73b3439166845e5d48199391d9fd0a90997d0790744"
+        data += b"a4748ea271ed301920898b5b5a7d0c4d91c0fc06c1585ed2e050c8b7c7"
+        data += b"8eef239fdcdbcf91510e52d862beb839d80e4bc431c290f0da89960bf2"
+        data += b"0c655a201bdaf768478f2e22539f050203010001a350304e301d060355"
+        data += b"1d0e0416041487dca658f477a8be358453feb61c796d6a6c5b5d301f06"
+        data += b"03551d2304183016801487dca658f477a8be358453feb61c796d6a6c5b"
+        data += b"5d300c0603551d13040530030101ff300d06092a864886f70d01010505"
+        data += b"00038181003d1dfb7cdd46b2fb8b1d3fa18207634056ddfae8fc5e3ce7"
+        data += b"24a1dd0d154f73d885711024322cfd88871156807061bffa15378fe341"
+        data += b"d4b91773cdba279645458af6fc3511fc613c284bc36e69559428c6b8a9"
+        data += b"4cc674399bc69dc8c2e673ea709638320bdd98d0a3c4b7a94e31184e27"
+        data += b"e75c4273543b02a6ca1151b8a4bb03da79"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.epoch == 0
+        assert record.sequence_number == 2
+        assert record.length == 696
+
+        # Handshake
+        handshake = record.payload
+        assert handshake.type == 11
+        assert handshake.length == 684
+        assert handshake.message_seq == 2
+        assert handshake.fragment_offset == 0
+        assert handshake.fragment_length == 684
+
+        # Certificate
+        certificate = record.payload.payload
+        assert len(certificate.certificate_list) == 1
+        assert len(certificate.certificate_list[0].value) == 678
+
+
 class TestClientHello(object):
 
     def test_pkg1(self):
