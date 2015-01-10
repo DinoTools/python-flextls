@@ -61,6 +61,24 @@ class UInteger3Field(Field):
         return data[self.size:]
 
 
+class UInt48Field(Field):
+    def __init__(self, name, default):
+        Field.__init__(self, name, default, "HI")
+
+    def assemble(self):
+        value = (int(self.value / (2**32)), int(self.value % (2**32)))
+        return struct.pack(self.fmt, *value)
+
+    def dissect(self, data):
+        if len(data) < self.size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        tmp = struct.unpack(self.fmt, data[:self.size])
+        self.value = (tmp[0] * (2 ** 32)) + tmp[1]
+        return data[self.size:]
+
 ## Enums
 
 
