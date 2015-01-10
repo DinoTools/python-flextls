@@ -78,7 +78,8 @@ class EllipticCurves(Protocol):
         self.fields = [
             VectorListUShortField(
                 "elliptic_curve_list",
-                item_class=UShortField
+                item_class=UShortField,
+                item_class_args=[None, None]
             ),
         ]
 
@@ -91,7 +92,8 @@ class SignatureAlgorithms(Protocol):
         self.fields = [
             VectorListUShortField(
                 "supported_signature_algorithms",
-                item_class=SignatureAndHashAlgorithmField
+                item_class=SignatureAndHashAlgorithmField,
+                item_class_args=[None, None]
             ),
         ]
 
