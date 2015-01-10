@@ -10,7 +10,8 @@ from flextls.field import UByteEnumField, UShortField, UInt48Field, VersionField
 from flextls.protocol import Protocol
 from flextls.protocol.alert import Alert
 from flextls.protocol.change_cipher_spec import ChangeCipherSpec
-from flextls.protocol.handshake import Handshake, SSLv2ClientHello, SSLv2ServerHello
+from flextls.protocol.handshake import Handshake, DTLSv10Handshake
+from flextls.protocol.handshake import SSLv2ClientHello, SSLv2ServerHello
 from flextls.protocol.heartbeat import Heartbeat
 
 
@@ -168,6 +169,7 @@ class RecordSSLv3(Protocol):
         self.payload_length_field = "length"
 
 
+RecordDTLSv1.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
 RecordSSLv3.add_payload_type(20, ChangeCipherSpec)

@@ -11,6 +11,37 @@ from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
 
 
+class DTLSv10Handshake(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            UByteEnumField(
+                "type",
+                None,
+                {
+                    0: "hello_request",
+                    1: "client_hello",
+                    2: "server_hello",
+                    3: "hello_verify_request",
+                    11: "certificate",
+                    12: "server_key_exchange",
+                    13: "certificate_request",
+                    14: "server_hello_done",
+                    15: "certificate_verify",
+                    16: "client_key_exchange",
+                    20: "finished",
+                    255: None
+                }
+            ),
+            UInteger3Field("length", 0),
+            UShortField("message_seq", 0),
+            UInteger3Field("fragment_offset", 0),
+            UInteger3Field("fragment_length", 0)
+        ]
+        self.payload_identifier_field = "type"
+        self.payload_length_field = "length"
+
+
 class Handshake(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
