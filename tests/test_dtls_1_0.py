@@ -72,3 +72,41 @@ class TestClientHello(object):
         assert len(client_hello.cipher_suites) == 39
 
         assert len(client_hello.compression_methods) == 1
+
+
+class TestHelloVerifyRequest(object):
+    def test_pkg1(self):
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 0, Length 35
+        data = b"16feff00000000000000000023"
+
+        # Hello Verify Request, Length 23, Message Sequence 0, Fragment Offset 0, Fragment Length 23
+        data += b"030000170000000000000017"
+        # DTLS 1.0
+        data += b"feff"
+        # Cookie Length: 20, Cockie (20 bytes)
+        data += b"142c24633bb13af58be4a0f50e47767cfa93e63515"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.length == 35
+
+        assert record.payload.type == 3
+        assert record.payload.length == 23
+
+        assert record.payload.message_seq == 0
+        assert record.payload.fragment_offset == 0
+        assert record.payload.fragment_length == 23
+
+        # Client Hello
+        hello_verify = record.payload.payload
+        assert hello_verify.version.major == 254
+        assert hello_verify.version.minor == 255
+
+        assert len(hello_verify.cookie) == 20
