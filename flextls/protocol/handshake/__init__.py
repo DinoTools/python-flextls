@@ -150,6 +150,7 @@ class ServerKeyExchange(Protocol):
             # ToDo: need a state object to parse the server params
         ]
 
+DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
 Handshake.add_payload_type(12, ServerKeyExchange)
 
 
