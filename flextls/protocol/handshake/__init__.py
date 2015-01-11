@@ -160,6 +160,7 @@ class ServerHelloDone(Protocol):
         self.payload = None
         self.fields = []
 
+DTLSv10Handshake.add_payload_type(14, ServerHelloDone)
 Handshake.add_payload_type(14, ServerHelloDone)
 
 
