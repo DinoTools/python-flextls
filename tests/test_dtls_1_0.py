@@ -196,6 +196,46 @@ class TestClientHello(object):
         assert len(client_hello.extensions) == 4
 
 
+class TestClientKeyExchange(object):
+    def test_pkg1(self):
+
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 2, Length 78
+        data = b"16feff0000000000000002004e"
+
+        # Client Key Exchange, Length 66, Message Sequence 2, Fragment Offset 0, Fragment Length 66
+        data += b"100000420002000000000042"
+
+        # Pubkey Length: 65
+        data += b"41"
+        # Pubkey
+        data += b"0466c160c0cc7a657c0dbd19be373922ffed1e78315706332c17ccb79b" \
+                b"3b7d9050fd55bc74c37f36a8d4c6773b95314fe268e0385e490ef73079" \
+                b"c405f54c61265e"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.epoch == 0
+        assert record.sequence_number == 2
+        assert record.length == 78
+
+        # Handshake
+        handshake = record.payload
+        assert handshake.type == 16
+        assert handshake.length == 66
+        assert handshake.message_seq == 2
+        assert handshake.fragment_offset == 0
+        assert handshake.fragment_length == 66
+
+        # Server Key Exchange
+        key_exchange = record.payload.payload
+
+
 class TestHelloVerifyRequest(object):
     def test_pkg1(self):
         # Handshake, DTLSv1.0, Epoch 0, Sequence Number 0, Length 35
