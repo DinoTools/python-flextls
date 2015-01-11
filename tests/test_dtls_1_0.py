@@ -283,3 +283,54 @@ class TestServerHello(object):
         # ToDo: test cipher suite and compression
 
         assert len(server_hello.extensions) == 4
+
+
+class TestServerKeyExchange(object):
+    def test_pkg1(self):
+
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 3, Length 211
+        data = b"16feff000000000000000300d3"
+
+        # Server Key Exchange, Length 199, Message Sequence 3, Fragment Offset 0, Fragment Length 199
+        data += b"0c0000c700030000000000c7"
+        # Curve Type: named_curve (0x03), Named Curve: secp256r1 (0x0017)
+        data += b"030017"
+
+        # Pubkey Length: 65
+        data += b"41"
+        # Pubkey
+        data += b"0407220baac1ab19e1bcf6151a86a9e6c6d8f35b6bc034b9f6b26d8a82" \
+                b"6f9081c57f7038f66c1e9473e96310194cd71609038a5d1425951e857a" \
+                b"ee8d61e4a657d9"
+
+        # Signature Length: 128
+        data += b"0080"
+        # Signature
+        data += b"877afeccec9b09ecf17c637be672367f8a12127af39e5f4a93ced4989e" \
+                b"5fb213a4e99418480b54e5aac1f56865510620c1ae6bdcfad22511089a" \
+                b"053552b7da770b252e993c45a6354fc4d7bfdb844d1fa8748a22057a2a" \
+                b"8e38410c5ef6bec7acf6eda364c3d0afdddaef7b6d9745dc514bcb7241" \
+                b"0468624094790cf054475dd6"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.epoch == 0
+        assert record.sequence_number == 3
+        assert record.length == 211
+
+        # Handshake
+        handshake = record.payload
+        assert handshake.type == 12
+        assert handshake.length == 199
+        assert handshake.message_seq == 3
+        assert handshake.fragment_offset == 0
+        assert handshake.fragment_length == 199
+
+        # Server Key Exchange
+        key_exchange = record.payload.payload
