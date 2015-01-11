@@ -170,6 +170,7 @@ class ClientKeyExchange(Protocol):
         self.payload = None
         self.fields = []
 
+DTLSv10Handshake.add_payload_type(16, ClientKeyExchange)
 Handshake.add_payload_type(16, ClientKeyExchange)
 
 
