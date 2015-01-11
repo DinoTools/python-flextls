@@ -285,6 +285,35 @@ class TestServerHello(object):
         assert len(server_hello.extensions) == 4
 
 
+class TestServerHelloDone(object):
+    def test_pkg1(self):
+        # Handshake, DTLSv1.0, Epoch 0, Sequence Number 4, Length 12
+        data = b"16feff0000000000000004000c"
+
+        # Server Hello Done, Length 12, Message Sequence 4, Fragment Offset 0, Fragment Length 0
+        data += b"0e0000000004000000000000"
+
+        (record, data) = RecordDTLSv1().decode(binascii.unhexlify(data))
+        assert len(data) == 0
+
+        assert record.content_type == 22
+
+        assert record.version.major == 254
+        assert record.version.minor == 255
+
+        assert record.epoch == 0
+        assert record.sequence_number == 4
+        assert record.length == 12
+
+        # Handshake
+        handshake = record.payload
+        assert handshake.type == 14
+        assert handshake.length == 0
+        assert handshake.message_seq == 4
+        assert handshake.fragment_offset == 0
+        assert handshake.fragment_length == 0
+
+
 class TestServerKeyExchange(object):
     def test_pkg1(self):
 
