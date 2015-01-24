@@ -16,15 +16,20 @@ def get_version_name(protocol_version):
     return 'unknown'
 
 
-def get_tls_version(protocol_version):
-    ver_major = 3
+def get_version(protocol_version):
     if protocol_version == registry.version.SSLv3:
-        ver_minor = 0
+        return (3, 0)
     elif protocol_version == registry.version.TLSv10:
-        ver_minor = 1
+        return (3, 1)
     elif protocol_version == registry.version.TLSv11:
-        ver_minor = 2
+        return (3, 2)
     elif protocol_version == registry.version.TLSv12:
-        ver_minor = 3
+        return (3, 3)
+    elif protocol_version == registry.version.DTLSv10:
+        return (0xfe, 0xff)
 
-    return ver_major, ver_minor
+    # ToDo: raise exception?
+
+
+def get_tls_version(protocol_version):
+    return get_version(protocol_version)
