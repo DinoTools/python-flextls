@@ -41,6 +41,13 @@ class DTLSv10Handshake(Protocol):
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
 
+    def assemble(self):
+        Protocol.assemble(self)
+        # ToDo: Fragmentation is not supported
+        self.fragment_offset = 0
+        self.fragment_length = self.length
+        return Protocol.assemble(self)
+
 
 class DTLSv10ClientHello(Protocol):
     def __init__(self, **kwargs):
@@ -96,6 +103,7 @@ class Handshake(Protocol):
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
+
 
 class ClientHello(Protocol):
     def __init__(self, **kwargs):
