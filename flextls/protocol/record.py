@@ -121,7 +121,7 @@ class RecordSSLv2(Protocol):
         return data
 
 
-class RecordDTLSv1(Protocol):
+class RecordDTLSv10(Protocol):
 
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
@@ -169,7 +169,7 @@ class RecordSSLv3(Protocol):
         self.payload_length_field = "length"
 
 
-RecordDTLSv1.add_payload_type(22, DTLSv10Handshake)
+RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
 RecordSSLv3.add_payload_type(20, ChangeCipherSpec)
