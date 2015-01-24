@@ -57,6 +57,8 @@ class Registry(RegistryNamespace):
         self.register("version.TLSv10", 8)
         self.register("version.TLSv11", 16)
         self.register("version.TLSv12", 32)
+        # ToDo: find ids
+        self.register("version.DTLSv10", 256)
 
 
 class BaseRegistry(object):
@@ -81,23 +83,31 @@ class BaseRegistry(object):
     def clear(self):
         self._values = []
 
-    def get(self, id):
+    def get(self, id, dtls_only=False):
         for value in self._values:
             if value.id == id:
+                if dtls_only and not value.dtls:
+                    return None
                 return value
 
         # ToDo: return unknown?
         return None
 
-    def get_dict(self):
+    def get_dict(self, dtls_only=False):
         result = {}
         for item in self._values:
+            # SKip DTLS
+            if dtls_only and not item.dtls:
+                continue
             result[item.id] = item
         return result
 
-    def get_ids(self):
+    def get_ids(self, dtls_only=False):
         result = []
         for item in self._values:
+            # SKip DTLS
+            if dtls_only and not item.dtls:
+                continue
             result.append(item.id)
         return result
 
