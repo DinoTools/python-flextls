@@ -124,6 +124,19 @@ class Protocol(object):
 
         return data
 
+    @classmethod
+    def decode_raw_payload(cls, payload_type, payload_data, payload_auto_decode=False):
+        payload_cls = cls.payload_list.get(payload_type)
+        if payload_cls is None:
+            # ToDo:
+            raise Exception
+
+        return payload_cls.decode(
+            payload_data,
+            #connection_state=self._connection_state,
+            payload_auto_decode=payload_auto_decode
+        )
+
     def dissect(self, data, connection_state=None, payload_auto_decode=True):
         if connection_state is not None:
             self._connection_state = connection_state
