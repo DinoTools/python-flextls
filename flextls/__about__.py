@@ -13,10 +13,10 @@ __title__ = "flextls"
 __summary__ = "Pure Python SSL and TLS library"
 __uri__ = "http://github.com/DinoTools/python-flextls"
 
-__version__ = "0.2"
+__version__ = "0.3dev1"
 
 __author__ = "PhiBo (DinoTools)"
 __email__ = ""
 
 __license__ = "LGPLv3+"
-__copyright__ = "Copyright 2014 %s" % __author__
+__copyright__ = "Copyright 2014-2015 %s" % __author__
