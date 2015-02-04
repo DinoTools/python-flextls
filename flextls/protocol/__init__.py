@@ -14,6 +14,9 @@ class Protocol(object):
         self.payload = None
         self.payload_identifier_field = None
         self.payload_length_field = None
+        # DTLS
+        self.payload_fragment_length_field = None
+        self.payload_fragment_offset_field = None
 
     def __add__(self, payload):
         self.set_payload(payload)
@@ -90,6 +93,15 @@ class Protocol(object):
         if data is None:
             return False
 
+        if self.payload_fragment_length_field is not None and self.payload_fragment_offset_field is not None:
+            fragment_length = self.get_field_value(self.payload_fragment_length_field)
+            fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+            payload_length = self.get_field_value(self.payload_length_field)
+
+            if fragment_offset != 0 or fragment_length != payload_length:
+                self.payload = data
+                return data[:0]
+
         # print(self.payload_identifier_field)
         # print(self.payload_length_field)
         if self.payload_identifier_field is not None:
@@ -123,6 +135,19 @@ class Protocol(object):
                 self.payload = obj
 
         return data
+
+    @classmethod
+    def decode_raw_payload(cls, payload_type, payload_data, payload_auto_decode=False):
+        payload_cls = cls.payload_list.get(payload_type)
+        if payload_cls is None:
+            # ToDo:
+            raise Exception
+
+        return payload_cls.decode(
+            payload_data,
+            #connection_state=self._connection_state,
+            payload_auto_decode=payload_auto_decode
+        )
 
     def dissect(self, data, connection_state=None, payload_auto_decode=True):
         if connection_state is not None:
@@ -163,6 +188,19 @@ class Protocol(object):
 
         # ToDo: Change exception type?
         raise Exception("Payload pattern not found")
+
+    def is_fragment(self):
+        if self.payload_fragment_length_field is None and self.payload_fragment_offset_field is None:
+            return None
+
+        fragment_length = self.get_field_value(self.payload_fragment_length_field)
+        fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+        payload_length = self.get_field_value(self.payload_length_field)
+
+        if fragment_offset != 0 or fragment_length != payload_length:
+            return True
+
+        return False
 
     def set_field_value(self, name, value):
         for field in self.fields:

@@ -40,6 +40,8 @@ class DTLSv10Handshake(Protocol):
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
+        self.payload_fragment_length_field = "fragment_length"
+        self.payload_fragment_offset_field = "fragment_offset"
 
     def assemble(self):
         Protocol.assemble(self)
@@ -47,6 +49,44 @@ class DTLSv10Handshake(Protocol):
         self.fragment_offset = 0
         self.fragment_length = self.length
         return Protocol.assemble(self)
+
+    def concat(self, *parts):
+        found = True
+        while found:
+            found = False
+            tmp_parts = []
+            for part in parts:
+                fragment_length = self.get_field_value(self.payload_fragment_length_field)
+                fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+                part_fragment_length = part.get_field_value(part.payload_fragment_length_field)
+                part_fragment_offset = part.get_field_value(part.payload_fragment_offset_field)
+                fragment_end = fragment_offset + fragment_length
+                part_fragment_end = part_fragment_offset + part_fragment_length
+
+                if part_fragment_end < fragment_offset:
+                    tmp_parts.append(part)
+                    continue
+
+                if part_fragment_offset > fragment_end:
+                    tmp_parts.append(part)
+                    continue
+
+                if part_fragment_offset < fragment_offset and part_fragment_end >= fragment_offset:
+                    part_length = part_fragment_offset - fragment_offset
+                    self.payload += part.payload[:part_length]
+                    self.set_field_value(self.payload_fragment_offset_field, part_fragment_offset)
+                    self.set_field_value(self.payload_fragment_length_field, len(self.payload))
+
+                if part_fragment_offset <= fragment_end and part_fragment_end > fragment_end:
+                    part_offset = fragment_end - part_fragment_offset
+                    self.payload += part.payload[part_offset:]
+                    self.set_field_value(self.payload_fragment_length_field, len(self.payload))
+
+                found = True
+
+            parts = tmp_parts
+
+        return parts
 
 
 class DTLSv10ClientHello(Protocol):
