@@ -6,6 +6,10 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add support for DTLSv 1.0
+* Add support to handle fragmentation on the record layer (TLS)
+* Add support to handle fragmented handshake messages (DTLS)
+
 
 0.2 - 2014-11-17
 ~~~~~~~~~~~~~~~~
