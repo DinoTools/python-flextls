@@ -59,6 +59,7 @@ class Registry(RegistryNamespace):
         self.register("version.TLSv12", 32)
         # ToDo: find ids
         self.register("version.DTLSv10", 256)
+        self.register("version.DTLS", 256)
 
 
 class BaseRegistry(object):
@@ -72,8 +73,17 @@ class BaseRegistry(object):
         ]
         self._item_cls = None
 
+    def __contains__(self, item):
+        return item in self._values
+
+    def __getitem__(self, key):
+        return self._values[key]
+
     def __iter__(self):
         return self._values.__iter__()
+
+    def __reversed__(self):
+        return self._values.__reversed__()
 
     def append(self, value):
         if self.get(value.id) is not None:
