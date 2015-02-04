@@ -11,6 +11,113 @@ from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
 
 
+class DTLSv10Handshake(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            UByteEnumField(
+                "type",
+                None,
+                {
+                    0: "hello_request",
+                    1: "client_hello",
+                    2: "server_hello",
+                    3: "hello_verify_request",
+                    11: "certificate",
+                    12: "server_key_exchange",
+                    13: "certificate_request",
+                    14: "server_hello_done",
+                    15: "certificate_verify",
+                    16: "client_key_exchange",
+                    20: "finished",
+                    255: None
+                }
+            ),
+            UInteger3Field("length", 0),
+            UShortField("message_seq", 0),
+            UInteger3Field("fragment_offset", 0),
+            UInteger3Field("fragment_length", 0)
+        ]
+        self.payload_identifier_field = "type"
+        self.payload_length_field = "length"
+        self.payload_fragment_length_field = "fragment_length"
+        self.payload_fragment_offset_field = "fragment_offset"
+
+    def assemble(self):
+        Protocol.assemble(self)
+        # ToDo: Fragmentation is not supported
+        self.fragment_offset = 0
+        self.fragment_length = self.length
+        return Protocol.assemble(self)
+
+    def concat(self, *parts):
+        found = True
+        while found:
+            found = False
+            tmp_parts = []
+            for part in parts:
+                fragment_length = self.get_field_value(self.payload_fragment_length_field)
+                fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+                part_fragment_length = part.get_field_value(part.payload_fragment_length_field)
+                part_fragment_offset = part.get_field_value(part.payload_fragment_offset_field)
+                fragment_end = fragment_offset + fragment_length
+                part_fragment_end = part_fragment_offset + part_fragment_length
+
+                if part_fragment_end < fragment_offset:
+                    tmp_parts.append(part)
+                    continue
+
+                if part_fragment_offset > fragment_end:
+                    tmp_parts.append(part)
+                    continue
+
+                if part_fragment_offset < fragment_offset and part_fragment_end >= fragment_offset:
+                    part_length = part_fragment_offset - fragment_offset
+                    self.payload += part.payload[:part_length]
+                    self.set_field_value(self.payload_fragment_offset_field, part_fragment_offset)
+                    self.set_field_value(self.payload_fragment_length_field, len(self.payload))
+
+                if part_fragment_offset <= fragment_end and part_fragment_end > fragment_end:
+                    part_offset = fragment_end - part_fragment_offset
+                    self.payload += part.payload[part_offset:]
+                    self.set_field_value(self.payload_fragment_length_field, len(self.payload))
+
+                found = True
+
+            parts = tmp_parts
+
+        return parts
+
+
+class DTLSv10ClientHello(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            VersionField("version"),
+            RandomField("random"),
+            VectorUByteField("session_id"),
+            VectorUByteField("cookie"),
+            CipherSuitesField("cipher_suites"),
+            CompressionMethodsField("compression_methods"),
+            ExtensionsField("extensions"),
+        ]
+
+DTLSv10Handshake.add_payload_type(1, DTLSv10ClientHello)
+
+
+class DTLSv10HelloVerifyRequest(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            VersionField("version"),
+            VectorUByteField("cookie")
+        ]
+
+DTLSv10Handshake.add_payload_type(3, DTLSv10HelloVerifyRequest)
+
+
 class Handshake(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
@@ -36,6 +143,7 @@ class Handshake(Protocol):
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
+
 
 class ClientHello(Protocol):
     def __init__(self, **kwargs):
@@ -66,6 +174,7 @@ class ServerHello(Protocol):
             ExtensionsField("extensions"),
         ]
 
+DTLSv10Handshake.add_payload_type(2, ServerHello)
 Handshake.add_payload_type(2, ServerHello)
 
 
@@ -77,6 +186,7 @@ class ServerCertificate(Protocol):
             CertificateListField("certificate_list"),
         ]
 
+DTLSv10Handshake.add_payload_type(11, ServerCertificate)
 Handshake.add_payload_type(11, ServerCertificate)
 
 
@@ -88,6 +198,7 @@ class ServerKeyExchange(Protocol):
             # ToDo: need a state object to parse the server params
         ]
 
+DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
 Handshake.add_payload_type(12, ServerKeyExchange)
 
 
@@ -97,6 +208,7 @@ class ServerHelloDone(Protocol):
         self.payload = None
         self.fields = []
 
+DTLSv10Handshake.add_payload_type(14, ServerHelloDone)
 Handshake.add_payload_type(14, ServerHelloDone)
 
 
@@ -106,6 +218,7 @@ class ClientKeyExchange(Protocol):
         self.payload = None
         self.fields = []
 
+DTLSv10Handshake.add_payload_type(16, ClientKeyExchange)
 Handshake.add_payload_type(16, ClientKeyExchange)
 
 

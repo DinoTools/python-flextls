@@ -14,6 +14,9 @@ class Protocol(object):
         self.payload = None
         self.payload_identifier_field = None
         self.payload_length_field = None
+        # DTLS
+        self.payload_fragment_length_field = None
+        self.payload_fragment_offset_field = None
 
     def __add__(self, payload):
         self.set_payload(payload)
@@ -89,6 +92,15 @@ class Protocol(object):
 
         if data is None:
             return False
+
+        if self.payload_fragment_length_field is not None and self.payload_fragment_offset_field is not None:
+            fragment_length = self.get_field_value(self.payload_fragment_length_field)
+            fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+            payload_length = self.get_field_value(self.payload_length_field)
+
+            if fragment_offset != 0 or fragment_length != payload_length:
+                self.payload = data
+                return data[:0]
 
         # print(self.payload_identifier_field)
         # print(self.payload_length_field)
@@ -176,6 +188,19 @@ class Protocol(object):
 
         # ToDo: Change exception type?
         raise Exception("Payload pattern not found")
+
+    def is_fragment(self):
+        if self.payload_fragment_length_field is None and self.payload_fragment_offset_field is None:
+            return None
+
+        fragment_length = self.get_field_value(self.payload_fragment_length_field)
+        fragment_offset = self.get_field_value(self.payload_fragment_offset_field)
+        payload_length = self.get_field_value(self.payload_length_field)
+
+        if fragment_offset != 0 or fragment_length != payload_length:
+            return True
+
+        return False
 
     def set_field_value(self, name, value):
         for field in self.fields:

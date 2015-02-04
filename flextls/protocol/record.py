@@ -6,11 +6,12 @@ import struct
 import six
 
 from flextls.exception import NotEnoughData
-from flextls.field import UByteEnumField, UShortField, VersionField
+from flextls.field import UByteEnumField, UShortField, UInt48Field, VersionField
 from flextls.protocol import Protocol
 from flextls.protocol.alert import Alert
 from flextls.protocol.change_cipher_spec import ChangeCipherSpec
-from flextls.protocol.handshake import Handshake, SSLv2ClientHello, SSLv2ServerHello
+from flextls.protocol.handshake import Handshake, DTLSv10Handshake
+from flextls.protocol.handshake import SSLv2ClientHello, SSLv2ServerHello
 from flextls.protocol.heartbeat import Heartbeat
 
 
@@ -120,6 +121,31 @@ class RecordSSLv2(Protocol):
         return data
 
 
+class RecordDTLSv10(Protocol):
+
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            UByteEnumField(
+                "content_type",
+                None,
+                {
+                    20: "change_cipher_spec",
+                    21: "alert",
+                    22: "handshake",
+                    23: "application_data",
+                    255: None
+                }
+            ),
+            VersionField("version"),
+            UShortField("epoch", 0),
+            UInt48Field("sequence_number", 0),
+            UShortField("length", 0),
+        ]
+        self.payload_identifier_field = "content_type"
+        self.payload_length_field = "length"
+
+
 class RecordSSLv3(Protocol):
 
     def __init__(self, **kwargs):
@@ -143,6 +169,8 @@ class RecordSSLv3(Protocol):
         self.payload_length_field = "length"
 
 
+RecordDTLSv10.add_payload_type(21, Alert)
+RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
 RecordSSLv3.add_payload_type(20, ChangeCipherSpec)

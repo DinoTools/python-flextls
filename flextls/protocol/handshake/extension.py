@@ -2,7 +2,7 @@
 
 """
 from flextls.protocol import Protocol
-from flextls.field import UShortField, VectorUShortField
+from flextls.field import UByteField, UShortField, VectorListUByteField, VectorUShortField
 from flextls.field import UByteEnumField, UShortEnumField, VectorListUShortField
 from flextls.field import SignatureAndHashAlgorithmField
 from flextls.field import ServerNameListField
@@ -78,11 +78,26 @@ class EllipticCurves(Protocol):
         self.fields = [
             VectorListUShortField(
                 "elliptic_curve_list",
-                item_class=UShortField
+                item_class=UShortField,
+                item_class_args=[None, None]
             ),
         ]
 
 Extension.add_payload_type(0x000a, EllipticCurves)
+
+
+class EcPointFormats(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            VectorListUByteField(
+                "point_format_list",
+                item_class=UByteField,
+                item_class_args=[None, None]
+            ),
+        ]
+
+Extension.add_payload_type(0x000b, EcPointFormats)
 
 
 class SignatureAlgorithms(Protocol):
@@ -91,7 +106,8 @@ class SignatureAlgorithms(Protocol):
         self.fields = [
             VectorListUShortField(
                 "supported_signature_algorithms",
-                item_class=SignatureAndHashAlgorithmField
+                item_class=SignatureAndHashAlgorithmField,
+                item_class_args=[None, None]
             ),
         ]
 
