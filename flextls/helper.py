@@ -12,6 +12,8 @@ def get_version_name(protocol_version):
         return "TLSv1.1"
     if protocol_version == registry.version.TLSv12:
         return "TLSv1.2"
+    if protocol_version == registry.version.DTLSv10:
+        return "DTLSv10"
 
     return 'unknown'
 
