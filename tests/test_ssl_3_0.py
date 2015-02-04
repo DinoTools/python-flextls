@@ -4,6 +4,7 @@ import pytest
 
 from flextls.exception import NotEnoughData
 from flextls.protocol.record import Record, RecordSSLv3
+from flextls import TLSv10Connection
 
 
 class TestSSLv3(object):
@@ -83,6 +84,42 @@ class TestClientHello(object):
     def test_client_hello_compression_methods(self):
         record = self._get_record()
         assert len(record.payload.payload.compression_methods) == 2
+
+
+class TestClientHello2(object):
+
+    def test_get_record(self):
+        con = TLSv10Connection()
+
+        data = b""
+        # Client Hello, Length 132, SSLv3.0
+        data += b"010000840300"
+        # Random
+        data += b"0a629b0e415bb5c62ba473e0d9c14b75b189039413669a9457eb2bada593a408"
+        # Session ID
+        data += b"00"
+        # Cipher Suites Length 92
+        data += b"005c"
+        # Cipher Suites 46
+        data += b"c014c00a0039003800880087c00fc00500350084"
+        data += b"c013c00900330032009a009900450044c00ec004"
+        data += b"002f009600410007c011c007c00cc00200050004"
+        data += b"c012c00800160013c00dc003000a001500120009"
+        data += b"0014001100080006000300ff"
+        # Compression Methods Length 2: Deflate, null
+        data += b"020100"
+
+        n = 50
+        data_splited = [data[i:i + n] for i in range(0, len(data), n)]
+
+        # Handshake, SSLv3.0, Length 136
+        for part in data_splited:
+            l = "%.2x" % len(part)
+            data = b"16030000" + l.encode('ascii') + part
+            con.decode(data)
+
+        # (record, data) = Record().decode(binascii.unhexlify(data))
+        #return record
 
 
 class TestServerHello(object):
