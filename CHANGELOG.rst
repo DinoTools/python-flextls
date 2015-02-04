@@ -15,9 +15,11 @@ Changelog
 ~~~~~~~~~~~~~~~~
 
 * Add Registry to store global information
+
   * Add SSL and TLS cipher suites
   * Add named curves
   * Add signature and hash algorithms
+
 * Add support to parse SSLv2 ClientHello and ServerHello packages
 * Fixes (Thanks to Till Maas)
 
