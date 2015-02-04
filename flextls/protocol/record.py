@@ -169,6 +169,7 @@ class RecordSSLv3(Protocol):
         self.payload_length_field = "length"
 
 
+RecordDTLSv10.add_payload_type(21, Alert)
 RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
