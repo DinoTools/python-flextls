@@ -28,7 +28,7 @@ Features
 * Supported cryptographic protocols:
 
   * SSLv2, SSLv3, TLS 1.0, TLS 1.1 and TLS 1.2
-  * DTLS 1.0
+  * DTLS 1.0 and DTLS 1.2
 
 * Decode and encode SSL/TLS/DTLS records
 * Handle fragmentation
