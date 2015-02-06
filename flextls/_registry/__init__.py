@@ -59,7 +59,8 @@ class Registry(RegistryNamespace):
         self.register("version.TLSv12", 32)
         # ToDo: find ids
         self.register("version.DTLSv10", 256)
-        self.register("version.DTLS", 256)
+        self.register("version.DTLSv12", 512)
+        self.register("version.DTLS", 256 + 512)
 
 
 class BaseRegistry(object):

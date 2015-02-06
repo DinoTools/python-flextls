@@ -14,6 +14,8 @@ def get_version_name(protocol_version):
         return "TLSv1.2"
     if protocol_version == registry.version.DTLSv10:
         return "DTLSv10"
+    if protocol_version == registry.version.DTLSv12:
+        return "DTLSv12"
 
     return 'unknown'
 
@@ -29,6 +31,8 @@ def get_version(protocol_version):
         return (3, 3)
     elif protocol_version == registry.version.DTLSv10:
         return (0xfe, 0xff)
+    elif protocol_version == registry.version.DTLSv12:
+        return (0xfe, 0xfd)
 
     # ToDo: raise exception?
 
