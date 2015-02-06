@@ -52,16 +52,33 @@ class Registry(RegistryNamespace):
             "ec.named_curves",
             ECNamedCurveRegistry()
         )
-        self.register("version.SSLv2", 2)
-        self.register("version.SSLv3", 4)
-        self.register("version.TLSv10", 8)
-        self.register("version.TLSv11", 16)
-        self.register("version.TLSv12", 32)
-        # ToDo: find ids
-        self.register("version.DTLSv10", 256)
-        self.register("version.DTLSv12", 512)
-        self.register("version.DTLS", 256 + 512)
 
+        reg = ProtocolVersionRegistry()
+        self.register(
+            "version_info",
+            reg
+        )
+
+        dtls_id = 0
+        ssl_id = 0
+        tls_id = 0
+        for ver in reg:
+            if ver.dtls is True:
+                dtls_id += ver.id
+            elif ver.name.startswith('SSLv'):
+                ssl_id += ver.id
+            elif ver.name.startswith('TLSv'):
+                tls_id += ver.id
+
+            # Create shortcuts
+            self.register(
+                "version.%s" % ver.name.strip(),
+                ver.id
+            )
+
+        self.register("version.DTLS", dtls_id)
+        self.register("version.SSL", ssl_id)
+        self.register("version.TLS", tls_id)
 
 class BaseRegistry(object):
     def __init__(self):
@@ -262,3 +279,18 @@ class TLSSignatureAlgorithm(BaseRegistryItem):
 class ECNamedCurve(BaseRegistryItem):
     def __init__(self, id, **kwargs):
         BaseRegistryItem.__init__(self, id, **kwargs)
+
+
+class ProtocolVersion(BaseRegistryItem):
+    def __init__(self, id, version_id=None, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
+        self.version_id = version_id
+
+
+class ProtocolVersionRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = ProtocolVersion
+        if auto_load:
+            from flextls._registry.data import protocol_versions
+            self.load(protocol_versions, replace=True)

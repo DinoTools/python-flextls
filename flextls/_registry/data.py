@@ -1,3 +1,55 @@
+protocol_versions = [
+    {
+        "id": 2,
+        "name": "SSLv2",
+        "dtls": False,
+        "references": [],
+        "version_id": (2, 0),
+    },
+    {
+        "id": 4,
+        "name": "SSLv3",
+        "dtls": False,
+        "references": [],
+        "version_id": (3, 0),
+    },
+    {
+        "id": 8,
+        "name": "TLSv10",
+        "dtls": False,
+        "references": [],
+        "version_id": (3, 1),
+    },
+    {
+        "id": 16,
+        "name": "TLSv11",
+        "dtls": False,
+        "references": [],
+        "version_id": (3, 2),
+    },
+    {
+        "id": 32,
+        "name": "TLSv12",
+        "dtls": False,
+        "references": [],
+        "version_id": (3, 3),
+    },
+    {
+        "id": 256,
+        "name": "DTLSv19",
+        "dtls": True,
+        "references": [],
+        "version_id": (0xfe, 0xff),
+    },
+    {
+        "id": 512,
+        "name": "DTLSv12",
+        "dtls": True,
+        "references": [],
+        "version_id": (0xfe, 0xfd),
+    },
+]
+
 """
 See: http://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
 """
