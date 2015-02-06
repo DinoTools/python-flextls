@@ -3,12 +3,13 @@ from flextls.__about__ import (
     __author__, __copyright__, __email__, __license__, __summary__, __title__,
     __uri__, __version__
 )
-from flextls.exception import NotEnoughData
+from flextls.exception import NotEnoughData, WrongProtocolVersion
 from flextls.protocol.record import RecordSSLv3
 from flextls.protocol.handshake import Handshake
 
 registry = Registry()
 
+from flextls import helper
 from flextls.protocol import Protocol
 from flextls.protocol.record import RecordDTLSv10
 from flextls.protocol.handshake import DTLSv10Handshake
@@ -95,13 +96,14 @@ class ConnectionState(object):
 
 
 class BaseConnection(object):
-    def __init__(self):
+    def __init__(self, protocol_version):
         self._raw_stream_data = b""
 
         self._cur_record_type = None
         self._cur_record_data = b""
         # ToDo: name
         self._decoded_records = []
+        self._cur_protocol_version = protocol_version
 
     def _decode_record_payload(self):
         while len(self._cur_record_data) > 0:
@@ -128,6 +130,18 @@ class BaseConnection(object):
                     self._raw_stream_data,
                     payload_auto_decode=False
                 )
+                version = helper.get_version_by_version_id((
+                    obj.version.major,
+                    obj.version.minor
+                ))
+
+                self._raw_stream_data = data
+
+                if version != self._cur_protocol_version:
+                    raise WrongProtocolVersion(
+                        record=obj
+                    )
+
                 if self._cur_record_type is None:
                     self._cur_record_type = obj.content_Type
 
@@ -138,11 +152,28 @@ class BaseConnection(object):
 
                 self._cur_record_data += obj.payload
 
-                self._raw_stream_data = data
                 self._decode_record_payload()
 
             except NotEnoughData:
                 break
+
+    def encode(self, records):
+        if isinstance(records, Protocol):
+            records = [records]
+
+        pkgs = []
+        for record in records:
+            if isinstance(record, Protocol):
+                tls_record = RecordSSLv3()
+                ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
+                tls_record.version.major = ver_major
+                tls_record.version.minor = ver_minor
+                tls_record.set_payload(record)
+                pkgs.append(tls_record.encode())
+            else:
+                raise TypeError("Record must be of type flextls.protocol.Protocol()")
+
+        return pkgs
 
     def is_empty(self):
         return len(self._decoded_records) == 0
