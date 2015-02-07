@@ -16,8 +16,30 @@ from flextls.protocol.handshake import DTLSv10Handshake
 from flextls.exception import NotEnoughData
 
 
-class BaseDTLSConnection(object):
-    def __init__(self):
+class BaseConnection(object):
+    def __init__(self, protocol_version):
+        self._decoded_records = []
+        self._cur_protocol_version = protocol_version
+
+    def clear_records(self):
+        self._decoded_records.clear()
+
+    def decode(self, data):
+        raise NotImplementedError
+
+    def encode(self, records):
+        raise NotImplementedError
+
+    def is_empty(self):
+        return len(self._decoded_records) == 0
+
+    def pop_record(self):
+        return self._decoded_records.pop(0)
+
+
+class BaseDTLSConnection(BaseConnection):
+    def __init__(self, protocol_version):
+        BaseConnection.__init__(self, protocol_version=protocol_version)
         self._window = []
         self._window_next_seq = 0
 
@@ -25,9 +47,12 @@ class BaseDTLSConnection(object):
             self._window.append(None)
 
         self._handshake_next_receive_seq = 0
+        self._handshake_next_send_seq = 0
         self._handshake_msg_queue = []
 
-        self._decoded_records = []
+        self._record_next_receive_seq = 0
+        self._record_next_send_seq = 0
+        self._epoch = 0
 
     def _process(self, obj):
         if isinstance(obj, DTLSv10Handshake):
@@ -59,6 +84,17 @@ class BaseDTLSConnection(object):
                     data,
                     payload_auto_decode=False
                 )
+
+                version = helper.get_version_by_version_id((
+                    obj.version.major,
+                    obj.version.minor
+                ))
+
+                if version != self._cur_protocol_version:
+                    # ToDo: Save data before exit?
+                    raise WrongProtocolVersion(
+                        record=obj
+                    )
                 (record, tmp_data) = RecordDTLSv10.decode_raw_payload(obj.content_type, obj.payload, payload_auto_decode=False)
 
                 self._process(record)
@@ -66,6 +102,32 @@ class BaseDTLSConnection(object):
             except NotEnoughData as e:
                 print(e)
                 break
+
+    def encode(self, records):
+        if isinstance(records, Protocol):
+            records = [records]
+
+        pkgs = []
+        for record in records:
+            if not isinstance(record, Protocol):
+                raise TypeError("Record must be of type flextls.protocol.Protocol()")
+
+            if isinstance(record, DTLSv10Handshake):
+                record.message_seq = self._handshake_next_send_seq
+                self._handshake_next_send_seq += 1
+
+            dtls_record = RecordDTLSv10()
+            ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
+            dtls_record.version.major = ver_major
+            dtls_record.version.minor = ver_minor
+            dtls_record.set_payload(record)
+            dtls_record.epoch = self._epoch
+            dtls_record.sequence_number = self._record_next_send_seq
+
+            pkgs.append(dtls_record.encode())
+            self._record_next_send_seq += 1
+
+        return pkgs
 
     def is_empty(self):
         return len(self._decoded_records) == 0
@@ -95,15 +157,13 @@ class ConnectionState(object):
         self.server_random = None
 
 
-class BaseConnection(object):
+class BaseTLSConnection(BaseConnection):
     def __init__(self, protocol_version):
+        BaseConnection.__init__(self, protocol_version=protocol_version)
         self._raw_stream_data = b""
 
         self._cur_record_type = None
         self._cur_record_data = b""
-        # ToDo: name
-        self._decoded_records = []
-        self._cur_protocol_version = protocol_version
 
     def _decode_record_payload(self):
         while len(self._cur_record_data) > 0:
@@ -118,9 +178,6 @@ class BaseConnection(object):
 
             except NotEnoughData:
                 break
-
-    def clear_records(self):
-        self._decoded_records.clear()
 
     def decode(self, data):
         self._raw_stream_data += data
@@ -175,12 +232,6 @@ class BaseConnection(object):
 
         return pkgs
 
-    def is_empty(self):
-        return len(self._decoded_records) == 0
 
-    def pop_record(self):
-        return self._decoded_records.pop(0)
-
-
-class TLSv10Connection(BaseConnection):
+class TLSv10Connection(BaseTLSConnection):
     pass
