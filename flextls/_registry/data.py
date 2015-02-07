@@ -36,7 +36,7 @@ protocol_versions = [
     },
     {
         "id": 256,
-        "name": "DTLSv19",
+        "name": "DTLSv10",
         "dtls": True,
         "references": [],
         "version_id": (0xfe, 0xff),
