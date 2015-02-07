@@ -207,6 +207,10 @@ class Protocol(object):
             if field.name == name:
                 field.value = value
 
+    def set_field_values(self, values):
+        for n, v in values.items():
+            self.set_field_value(n, v)
+
     def set_payload(self, payload):
         if self.payload_identifier_field is not None:
             for pay_pattern, pay_class in self.payload_list.items():
