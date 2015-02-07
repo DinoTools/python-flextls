@@ -1,11 +1,14 @@
 import struct
 
+import six
+
 from flextls.exception import NotEnoughData
 
 
 class Field(object):
     def __init__(self, name, default, fmt="H"):
-        self.value = default
+        self._value = None
+        self.set_value(default)
         self.name = name
         if fmt[0] in "@=<>!":
             self.fmt = fmt
@@ -29,6 +32,13 @@ class Field(object):
         self.value = struct.unpack(self.fmt, data[:self.size])[0]
         return data[self.size:]
 
+    def get_value(self):
+        return self._value
+
+    def set_value(self, value):
+        self._value = value
+
+    value = property(get_value, set_value)
 
 ## Numbers
 
@@ -83,9 +93,45 @@ class UInt48Field(Field):
 
 
 class EnumField(Field):
-    def __init__(self, name, default, enum, fmt="H"):
-        self.enum = enum
+    def __init__(self, name, default, enums, fmt="H"):
+        self.enums = enums
         Field.__init__(self, name, default, fmt)
+
+    def get_value_name(self):
+        return "%s (%x)" % (
+            self.enums.get(self._value, 'n/a'),
+            self._value
+        )
+
+    def set_value(self, value, force=False):
+        if force:
+            self._value = value
+            return
+
+        if value is None:
+            self._value = value
+            return
+
+        if isinstance(value, six.integer_types):
+            self._value = value
+            return
+
+        if isinstance(value, six.string_types):
+            for v, n in self.enums.items():
+                if n == value:
+                    self._value = v
+                    return
+            raise ValueError("Unable to find value name in enum list")
+
+        raise TypeError(
+            "Value for '%s' must by of type String or Integer not '%s'" % (
+                self.name,
+                type(value)
+            )
+        )
+
+    value = property(Field.get_value, set_value)
+
 
 class UByteEnumField(EnumField):
     def __init__(self, name, default, enum):
