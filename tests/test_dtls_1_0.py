@@ -2,6 +2,7 @@ import binascii
 
 import pytest
 
+import flextls
 from flextls.exception import NotEnoughData
 from flextls.protocol.record import Record, RecordDTLSv10
 
@@ -88,7 +89,9 @@ class TestCertificate(object):
         from flextls import DTLSv10Connection
         from flextls.protocol.handshake import DTLSv10Handshake
         from flextls.protocol.handshake import ServerCertificate
-        conn_dtls = DTLSv10Connection()
+        conn_dtls = DTLSv10Connection(
+            protocol_version=flextls.registry.version.DTLSv10
+        )
         conn_dtls._handshake_next_receive_seq = 2
 
         n = 200
