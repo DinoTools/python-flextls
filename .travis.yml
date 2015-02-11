@@ -7,6 +7,12 @@ python:
   - "3.4"
 
 install:
-  - BUILD_LIB=1 pip install .
+  - pip install .
+  - pip install coveralls
+  - pip install pytest-cov
 
-script: py.test
+script:
+  py.test --cov flextls --cov-report=term-missing -v tests/
+
+after_script:
+  coveralls --verbose
