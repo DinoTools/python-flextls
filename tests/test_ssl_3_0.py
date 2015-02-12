@@ -3,9 +3,9 @@ import binascii
 import pytest
 
 import flextls
+from flextls.connection import TLSv10Connection
 from flextls.exception import NotEnoughData
 from flextls.protocol.record import Record, RecordSSLv3
-from flextls import TLSv10Connection
 
 
 class TestSSLv3(object):
