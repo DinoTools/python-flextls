@@ -1,10 +1,12 @@
+from flextls import helper
+
+
 class NotEnoughData(IOError):
     pass
 
 
 class WrongProtocolVersion(IOError):
     def __init__(self, msg=None, record=None, protocol_version=None):
-        from flextls import helper
         if msg is None:
             msg = "Wrong protocol version"
             msg_info = []
