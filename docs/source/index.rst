@@ -40,6 +40,7 @@ API Documentation
 .. toctree::
    :maxdepth: 2
 
+   api/field
    api/exception
 
 Indices and tables
