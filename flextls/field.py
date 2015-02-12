@@ -39,16 +39,16 @@ class Field(object):
 ## Numbers
 
 
-class UByteField(Field):
+class UInt8Field(Field):
     def __init__(self, name, default):
         Field.__init__(self, name, default, "B")
 
-class UShortField(Field):
+class UInt16Field(Field):
     def __init__(self, name, default):
         Field.__init__(self, name, default, "H")
 
 
-class UInteger3Field(Field):
+class UInt24Field(Field):
     def __init__(self, name, default):
         Field.__init__(self, name, default, "BH")
 
@@ -129,12 +129,12 @@ class EnumField(Field):
     value = property(Field.get_value, set_value)
 
 
-class UByteEnumField(EnumField):
+class UInt8EnumField(EnumField):
     def __init__(self, name, default, enum):
         EnumField.__init__(self, name, default, enum, "B")
 
 
-class UShortEnumField(EnumField):
+class UInt16EnumField(EnumField):
     def __init__(self, name, default, enum):
         EnumField.__init__(self, name, default, enum, "H")
 
@@ -196,17 +196,17 @@ class VectorListBaseField(object):
         return self.items
 
 
-class VectorListUByteField(VectorListBaseField):
+class VectorListUInt8Field(VectorListBaseField):
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="B")
 
 
-class VectorListUShortField(VectorListBaseField):
+class VectorListUInt16Field(VectorListBaseField):
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="H")
 
 
-class VectorListInteger3Field(VectorListBaseField):
+class VectorListInt24Field(VectorListBaseField):
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="BH")
 
@@ -243,37 +243,37 @@ class VectorListInteger3Field(VectorListBaseField):
         return data[payload_length:]
 
 
-class CertificateListField(VectorListInteger3Field):
+class CertificateListField(VectorListInt24Field):
     def __init__(self, name):
-        VectorListInteger3Field.__init__(
+        VectorListInt24Field.__init__(
             self,
             name,
             CertificateField,
         )
 
 
-class CipherSuitesField(VectorListUShortField):
+class CipherSuitesField(VectorListUInt16Field):
     def __init__(self, name):
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             CipherSuiteField,
         )
 
 
-class ServerNameListField(VectorListUShortField):
+class ServerNameListField(VectorListUInt16Field):
     def __init__(self, name):
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             ServerNameField,
         )
 
 
-class ExtensionsField(VectorListUShortField):
+class ExtensionsField(VectorListUInt16Field):
     def __init__(self, name):
         from flextls.protocol.handshake.extension import Extension
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             Extension
@@ -282,17 +282,17 @@ class ExtensionsField(VectorListUShortField):
     def assemble(self):
         if len(self.items) == 0:
             return b""
-        return VectorListUShortField.assemble(self)
+        return VectorListUInt16Field.assemble(self)
 
     def dissect(self, data):
         if len(data) == 0:
             return data
-        return VectorListUShortField.dissect(self, data)
+        return VectorListUInt16Field.dissect(self, data)
 
 
-class CompressionMethodsField(VectorListUByteField):
+class CompressionMethodsField(VectorListUInt8Field):
     def __init__(self, name):
-        VectorListUByteField.__init__(
+        VectorListUInt8Field.__init__(
             self,
             name,
             CompressionMethodField,
@@ -335,17 +335,17 @@ class VectorBaseField(object):
         return size
 
 
-class VectorUShortField(VectorBaseField):
+class VectorUInt16Field(VectorBaseField):
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="H")
 
 
-class VectorUByteField(VectorBaseField):
+class VectorUInt8Field(VectorBaseField):
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="B")
 
 
-class VectorInteger3Field(VectorBaseField):
+class VectorInt24Field(VectorBaseField):
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="BH")
 
@@ -373,9 +373,9 @@ class VectorInteger3Field(VectorBaseField):
         return data[data_length:]
 
 
-class CertificateField(VectorInteger3Field):
+class CertificateField(VectorInt24Field):
     def __init__(self, name="certificate"):
-        VectorInteger3Field.__init__(self, name)
+        VectorInt24Field.__init__(self, name)
 
 
 ## Multipart
@@ -487,7 +487,7 @@ class ServerNameField(MultiPartField):
     def __init__(self, name="test", **kwargs):
         MultiPartField.__init__(self, name, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "name_type",
                 None,
                 {
@@ -499,7 +499,7 @@ class ServerNameField(MultiPartField):
         self.payload_identifier_field = "name_type"
 
 
-class HostNameField(VectorUShortField):
+class HostNameField(VectorUInt16Field):
     pass
 
 
@@ -512,8 +512,8 @@ class VersionField(MultiPartField):
             self,
             name,
             [
-                UByteField("major", 3),
-                UByteField("minor", 0)
+                UInt8Field("major", 3),
+                UInt8Field("minor", 0)
             ]
         )
 
@@ -536,24 +536,24 @@ class SignatureAndHashAlgorithmField(MultiPartField):
             self,
             name,
             [
-                UByteField("hash", 0),
-                UByteField("signature", 0)
+                UInt8Field("hash", 0),
+                UInt8Field("signature", 0)
             ]
         )
 
 
 ## Custom
 
-class CipherSuiteField(UShortField):
+class CipherSuiteField(UInt16Field):
     def __init__(self, name="unnamed"):
-        UShortField.__init__(self, name, None)
+        UInt16Field.__init__(self, name, None)
 
 
-class SSLv2CipherSuiteField(UInteger3Field):
+class SSLv2CipherSuiteField(UInt24Field):
     def __init__(self, name="unnamed"):
-        UInteger3Field.__init__(self, name, None)
+        UInt24Field.__init__(self, name, None)
 
 
-class CompressionMethodField(UByteField):
+class CompressionMethodField(UInt8Field):
     def __init__(self, name="unnamed"):
-        UByteField.__init__(self, name, None)
+        UInt8Field.__init__(self, name, None)

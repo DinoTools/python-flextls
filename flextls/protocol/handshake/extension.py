@@ -2,8 +2,8 @@
 
 """
 from flextls.protocol import Protocol
-from flextls.field import UByteField, UShortField, VectorListUByteField, VectorUShortField
-from flextls.field import UByteEnumField, UShortEnumField, VectorListUShortField
+from flextls.field import UInt8Field, UInt16Field, VectorListUInt8Field, VectorUInt16Field
+from flextls.field import UInt8EnumField, UInt16EnumField, VectorListUInt16Field
 from flextls.field import SignatureAndHashAlgorithmField
 from flextls.field import ServerNameListField
 
@@ -12,7 +12,7 @@ class Extension(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UShortEnumField(
+            UInt16EnumField(
                 "type",
                 None,
                 {
@@ -20,7 +20,7 @@ class Extension(Protocol):
                     65535: None
                 }
             ),
-            UShortField("length", 0),
+            UInt16Field("length", 0),
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
@@ -57,7 +57,7 @@ class Heartbeat(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "mode",
                 None,
                 {
@@ -76,9 +76,9 @@ class EllipticCurves(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUShortField(
+            VectorListUInt16Field(
                 "elliptic_curve_list",
-                item_class=UShortField,
+                item_class=UInt16Field,
                 item_class_args=[None, None]
             ),
         ]
@@ -90,9 +90,9 @@ class EcPointFormats(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUByteField(
+            VectorListUInt8Field(
                 "point_format_list",
-                item_class=UByteField,
+                item_class=UInt8Field,
                 item_class_args=[None, None]
             ),
         ]
@@ -104,7 +104,7 @@ class SignatureAlgorithms(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUShortField(
+            VectorListUInt16Field(
                 "supported_signature_algorithms",
                 item_class=SignatureAndHashAlgorithmField,
                 item_class_args=[None, None]
@@ -118,7 +118,7 @@ class SessionTicketTLS(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorUShortField("data"),
+            VectorUInt16Field("data"),
         ]
 
     @classmethod

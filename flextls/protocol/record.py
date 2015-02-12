@@ -6,7 +6,7 @@ import struct
 import six
 
 from flextls.exception import NotEnoughData
-from flextls.field import UByteEnumField, UShortField, UInt48Field, VersionField
+from flextls.field import UInt8EnumField, UInt16Field, UInt48Field, VersionField
 from flextls.protocol import Protocol
 from flextls.protocol.alert import Alert
 from flextls.protocol.change_cipher_spec import ChangeCipherSpec
@@ -126,7 +126,7 @@ class RecordDTLSv10(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "content_type",
                 None,
                 {
@@ -138,9 +138,9 @@ class RecordDTLSv10(Protocol):
                 }
             ),
             VersionField("version"),
-            UShortField("epoch", 0),
+            UInt16Field("epoch", 0),
             UInt48Field("sequence_number", 0),
-            UShortField("length", 0),
+            UInt16Field("length", 0),
         ]
         self.payload_identifier_field = "content_type"
         self.payload_length_field = "length"
@@ -151,7 +151,7 @@ class RecordSSLv3(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "content_type",
                 None,
                 {
@@ -163,7 +163,7 @@ class RecordSSLv3(Protocol):
                 }
             ),
             VersionField("version"),
-            UShortField("length", 0),
+            UInt16Field("length", 0),
         ]
         self.payload_identifier_field = "content_type"
         self.payload_length_field = "length"

@@ -1,4 +1,4 @@
-from flextls.field import UByteEnumField
+from flextls.field import UInt8EnumField
 from flextls.protocol import Protocol
 
 
@@ -6,7 +6,7 @@ class Alert(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "level",
                 None,
                 {
@@ -15,7 +15,7 @@ class Alert(Protocol):
                     255: None
                 }
             ),
-            UByteEnumField(
+            UInt8EnumField(
                 "description",
                 None,
                 {
