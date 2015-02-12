@@ -17,10 +17,6 @@ class Field(object):
         self.size = struct.calcsize(self.fmt)
 
     def assemble(self):
-#        print("---")
-#        print(self)
-#        print(self.fmt)
-#        print(self.value)
         return struct.pack(self.fmt, self.value)
 
     def dissect(self, data):
@@ -172,11 +168,7 @@ class VectorListBaseField(object):
             raise NotEnoughData(
                 "Not enough data to decode field '%s' value" % self.name
             )
-#        print(self.name)
-#        print(len_size)
-#        print(data)
         payload_size = struct.unpack(self.fmt, data[:len_size])[0]
-#        print(payload_size)
         data = data[len_size:]
 
         if len(data) < payload_size:
@@ -443,9 +435,6 @@ class MultiPartField(object):
             )
 
         for field in self.fields:
-#            print(self)
-#            print(field)
-#            print(field.name)
             data = data + field.assemble()
 
         data = data + payload
@@ -455,8 +444,6 @@ class MultiPartField(object):
         for field in self.fields:
             data = field.dissect(data)
 
-        # print(self.payload_identifier_field)
-        # print(self.payload_length_field)
         if self.payload_identifier_field is not None:
             if self.payload_length_field is None:
                 payload_data = data
@@ -466,7 +453,6 @@ class MultiPartField(object):
                 payload_data = data[:payload_length]
                 data = data[payload_length:]
 
-            #print(payload_length)
             payload_class = None
             if self.payload_list is not None:
                 payload_class = self.payload_list.get(
