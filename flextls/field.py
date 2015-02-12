@@ -6,6 +6,13 @@ from flextls.exception import NotEnoughData
 
 
 class Field(object):
+    """
+    Base class for all fields. Used to extract additional information.
+
+    :param String name: Name of the field
+    :param Mixed default: Default field value
+    :param String fmt: Format string used to decode the data
+    """
     def __init__(self, name, default, fmt="H"):
         self._value = None
         self.set_value(default)
@@ -17,9 +24,22 @@ class Field(object):
         self.size = struct.calcsize(self.fmt)
 
     def assemble(self):
+        """
+        Assemble the field by using the given value.
+
+        :return: The assembled data
+        :rtype: bytes
+        """
         return struct.pack(self.fmt, self.value)
 
     def dissect(self, data):
+        """
+        Dissect the field.
+
+        :param bytes data: The data to extract the field value from
+        :return: The rest of the data not used to dissect the field value
+        :rtype: bytes
+        """
         if len(data) < self.size:
             raise NotEnoughData(
                 "Not enough data to decode field '%s' value" % self.name
@@ -29,9 +49,20 @@ class Field(object):
         return data[self.size:]
 
     def get_value(self):
+        """
+        Return the field value.
+
+        :return: The value of the field
+        :rtype: Mixed
+        """
         return self._value
 
     def set_value(self, value):
+        """
+        Set the value of the field
+
+        :param Mixed value: The value
+        """
         self._value = value
 
     value = property(get_value, set_value)
@@ -40,15 +71,25 @@ class Field(object):
 
 
 class UInt8Field(Field):
+    """
+    Field representing an 8-bit unsigned integer value(range: 0 through 255 decimal).
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "B")
 
+
 class UInt16Field(Field):
+    """
+    Field representing an 16-bit unsigned integer value(range: 0 through 65535 decimal).
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "H")
 
 
 class UInt24Field(Field):
+    """
+    Field representing an 16-bit unsigned integer value.
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "BH")
 
@@ -68,6 +109,9 @@ class UInt24Field(Field):
 
 
 class UInt48Field(Field):
+    """
+    Field representing an 48-bit unsigned integer value.
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "HI")
 
@@ -89,17 +133,37 @@ class UInt48Field(Field):
 
 
 class EnumField(Field):
+    """
+    The field should only use the defined values.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    :param String fmt: The format string
+    """
     def __init__(self, name, default, enums, fmt="H"):
         self.enums = enums
         Field.__init__(self, name, default, fmt)
 
     def get_value_name(self):
+        """
+        Get the name of the value
+
+        :return: The name
+        :rtype: String
+        """
         return "%s (%x)" % (
             self.enums.get(self._value, 'n/a'),
             self._value
         )
 
     def set_value(self, value, force=False):
+        """
+        Set the value.
+
+        :param value: The value to set. Must be in the enum list.
+        :param force: Set the value without checking it
+        """
         if force:
             self._value = value
             return
@@ -130,19 +194,41 @@ class EnumField(Field):
 
 
 class UInt8EnumField(EnumField):
-    def __init__(self, name, default, enum):
-        EnumField.__init__(self, name, default, enum, "B")
+    """
+    The field should only use the defined values. The value must be an 8-Bit unsigned integer.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    """
+    def __init__(self, name, default, enums):
+        EnumField.__init__(self, name, default, enums, "B")
 
 
 class UInt16EnumField(EnumField):
-    def __init__(self, name, default, enum):
-        EnumField.__init__(self, name, default, enum, "H")
+    """
+    The field should only use the defined values. The value must be an 16-Bit unsigned integer.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    """
+    def __init__(self, name, default, enums):
+        EnumField.__init__(self, name, default, enums, "H")
 
 
 ## Vectors
 
 
 class VectorListBaseField(object):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string
+    """
     def __init__(self, name, item_class=None, item_class_args=None, fmt="H"):
         self.name = name
         self.item_class = item_class
