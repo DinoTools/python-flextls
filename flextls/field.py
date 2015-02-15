@@ -129,6 +129,15 @@ class UInt48Field(Field):
         self.value = (tmp[0] * (2 ** 32)) + tmp[1]
         return data[self.size:]
 
+
+class RandomField(Field):
+    """
+    Random data.
+    """
+    def __init__(self, name):
+        Field.__init__(self, name, default=b"A"*32, fmt="32s")
+
+
 # Enums
 
 
@@ -701,18 +710,6 @@ class VersionField(MultiPartField):
             [
                 UInt8Field("major", 3),
                 UInt8Field("minor", 0)
-            ]
-        )
-
-
-class RandomField(MultiPartField):
-    def __init__(self, name):
-        MultiPartField.__init__(
-            self,
-            name,
-            [
-                # ToDo: extract time stamp
-                Field("random_bytes", 0, fmt="32s")
             ]
         )
 
