@@ -67,7 +67,7 @@ class Field(object):
 
     value = property(get_value, set_value)
 
-## Numbers
+# Numbers
 
 
 class UInt8Field(Field):
@@ -129,7 +129,7 @@ class UInt48Field(Field):
         self.value = (tmp[0] * (2 ** 32)) + tmp[1]
         return data[self.size:]
 
-## Enums
+# Enums
 
 
 class EnumField(Field):
@@ -217,7 +217,7 @@ class UInt16EnumField(EnumField):
         EnumField.__init__(self, name, default, enums, "H")
 
 
-## Vectors
+# Vectors
 
 
 class VectorListBaseField(object):
@@ -283,16 +283,43 @@ class VectorListBaseField(object):
 
 
 class VectorListUInt8Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 8-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="B")
 
 
 class VectorListUInt16Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 16-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="H")
 
 
 class VectorListInt24Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 24-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="BH")
 
@@ -330,6 +357,11 @@ class VectorListInt24Field(VectorListBaseField):
 
 
 class CertificateListField(VectorListInt24Field):
+    """
+    List of certificates
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         VectorListInt24Field.__init__(
             self,
@@ -339,6 +371,11 @@ class CertificateListField(VectorListInt24Field):
 
 
 class CipherSuitesField(VectorListUInt16Field):
+    """
+    List of cipher suites.
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         VectorListUInt16Field.__init__(
             self,
@@ -348,6 +385,11 @@ class CipherSuitesField(VectorListUInt16Field):
 
 
 class ServerNameListField(VectorListUInt16Field):
+    """
+    List of server names
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         VectorListUInt16Field.__init__(
             self,
@@ -357,6 +399,11 @@ class ServerNameListField(VectorListUInt16Field):
 
 
 class ExtensionsField(VectorListUInt16Field):
+    """
+    List of extensions
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         from flextls.protocol.handshake.extension import Extension
         VectorListUInt16Field.__init__(
@@ -377,6 +424,11 @@ class ExtensionsField(VectorListUInt16Field):
 
 
 class CompressionMethodsField(VectorListUInt8Field):
+    """
+    List of compression methods
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         VectorListUInt8Field.__init__(
             self,
@@ -386,6 +438,13 @@ class CompressionMethodsField(VectorListUInt8Field):
 
 
 class VectorBaseField(object):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+
+    :param String name: The name of the field
+    :param Bytes default: Default value of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, default=b"", fmt="H", connection_state=None):
         self.name = name
         self.value = default
@@ -421,17 +480,38 @@ class VectorBaseField(object):
         return size
 
 
-class VectorUInt16Field(VectorBaseField):
-    def __init__(self, name):
-        VectorBaseField.__init__(self, name, fmt="H")
-
-
 class VectorUInt8Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 8-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="B")
 
 
+class VectorUInt16Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 16-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
+    def __init__(self, name):
+        VectorBaseField.__init__(self, name, fmt="H")
+
+
 class VectorInt24Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 24-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="BH")
 
@@ -460,14 +540,31 @@ class VectorInt24Field(VectorBaseField):
 
 
 class CertificateField(VectorInt24Field):
+    """
+    A certificate.
+
+    :param String name: The name of the field
+    """
     def __init__(self, name="certificate"):
         VectorInt24Field.__init__(self, name)
 
 
-## Multipart
+class HostNameField(VectorUInt16Field):
+    """
+    The hostname.
+    """
+    pass
+
+# Multipart
 
 
 class MultiPartField(object):
+    """
+    A field consisting of more than one value.
+
+    :param String name: The name of the field
+    :param fields: List of sub fields
+    """
     payload_list = None
 
     def __init__(self, name, fields=[]):
@@ -570,6 +667,9 @@ class MultiPartField(object):
 
 
 class ServerNameField(MultiPartField):
+    """
+    The server name
+    """
     def __init__(self, name="test", **kwargs):
         MultiPartField.__init__(self, name, **kwargs)
         self.fields = [
@@ -585,14 +685,15 @@ class ServerNameField(MultiPartField):
         self.payload_identifier_field = "name_type"
 
 
-class HostNameField(VectorUInt16Field):
-    pass
-
-
 ServerNameField.add_payload_type(0, HostNameField)
 
 
 class VersionField(MultiPartField):
+    """
+    The protocol version field.
+
+    :param String name: Name of the field
+    """
     def __init__(self, name):
         MultiPartField.__init__(
             self,
@@ -617,6 +718,9 @@ class RandomField(MultiPartField):
 
 
 class SignatureAndHashAlgorithmField(MultiPartField):
+    """
+    Representing a signature and hash algorithm
+    """
     def __init__(self, name):
         MultiPartField.__init__(
             self,
@@ -628,18 +732,27 @@ class SignatureAndHashAlgorithmField(MultiPartField):
         )
 
 
-## Custom
+# Custom
 
 class CipherSuiteField(UInt16Field):
+    """
+    A cipher suite
+    """
     def __init__(self, name="unnamed"):
         UInt16Field.__init__(self, name, None)
 
 
 class SSLv2CipherSuiteField(UInt24Field):
+    """
+    A cipher suite for SSLv2
+    """
     def __init__(self, name="unnamed"):
         UInt24Field.__init__(self, name, None)
 
 
 class CompressionMethodField(UInt8Field):
+    """
+    Compression method
+    """
     def __init__(self, name="unnamed"):
         UInt8Field.__init__(self, name, None)
