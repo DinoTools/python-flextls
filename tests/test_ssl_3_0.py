@@ -71,7 +71,7 @@ class TestClientHello(object):
 
     def test_client_hello_random(self):
         record = self._get_record()
-        assert len(record.payload.payload.random.random_bytes) == 32
+        assert len(record.payload.payload.random) == 32
 
     def test_client_hello_session_id(self):
         record = self._get_record()
@@ -176,7 +176,7 @@ class TestServerHello(object):
 
     def test_client_hello_random(self):
         record = self._get_record()
-        assert len(record.payload.payload.random.random_bytes) == 32
+        assert len(record.payload.payload.random) == 32
 
     def test_client_hello_session_id(self):
         record = self._get_record()

@@ -156,7 +156,7 @@ class TestClientHello(object):
         assert client_hello.version.major == 254
         assert client_hello.version.minor == 255
 
-        assert len(client_hello.random.random_bytes) == 32
+        assert len(client_hello.random) == 32
 
         assert len(client_hello.session_id) == 0
 
@@ -216,7 +216,7 @@ class TestClientHello(object):
         assert client_hello.version.major == 254
         assert client_hello.version.minor == 255
 
-        assert len(client_hello.random.random_bytes) == 32
+        assert len(client_hello.random) == 32
 
         assert len(client_hello.session_id) == 0
         assert len(client_hello.cookie) == 20
@@ -348,7 +348,7 @@ class TestServerHello(object):
         assert server_hello.version.major == 254
         assert server_hello.version.minor == 255
 
-        assert len(server_hello.random.random_bytes) == 32
+        assert len(server_hello.random) == 32
 
         assert len(server_hello.session_id) == 0
 
