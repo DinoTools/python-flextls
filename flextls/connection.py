@@ -1,3 +1,6 @@
+"""
+The class in this python module can be used to handle SSL/TLS/DTLS connections.
+"""
 from flextls import helper
 from flextls.protocol import Protocol
 from flextls.protocol.record import RecordDTLSv10
@@ -9,6 +12,9 @@ from flextls.protocol.handshake import Handshake
 
 
 class BaseConnection(object):
+    """
+    Base class to handle SSL/TLS/DTLS connections and its state.
+    """
     def __init__(self, protocol_version):
         self._decoded_records = []
         self._cur_protocol_version = protocol_version
@@ -30,6 +36,9 @@ class BaseConnection(object):
 
 
 class BaseDTLSConnection(BaseConnection):
+    """
+    Base class for DTLS connections.
+    """
     def __init__(self, protocol_version):
         BaseConnection.__init__(self, protocol_version=protocol_version)
         self._window = []
@@ -129,10 +138,16 @@ class BaseDTLSConnection(BaseConnection):
 
 
 class DTLSv10Connection(BaseDTLSConnection):
+    """
+    Class to handle DTLS 1.0 and DTLS 1.2 connections.
+    """
     pass
 
 
 class BaseTLSConnection(BaseConnection):
+    """
+    Class to handle SSL/TLS connections.
+    """
     def __init__(self, protocol_version):
         BaseConnection.__init__(self, protocol_version=protocol_version)
         self._raw_stream_data = b""
@@ -208,5 +223,8 @@ class BaseTLSConnection(BaseConnection):
         return pkgs
 
 
-class TLSv10Connection(BaseTLSConnection):
+class SSLv30Connection(BaseTLSConnection):
+    """
+    Class to handle SSLv3.0, TLS 1.0, TLS 1.1 and TLS 1.2 connections.
+    """
     pass
