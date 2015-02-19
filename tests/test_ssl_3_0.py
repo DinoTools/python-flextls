@@ -3,7 +3,7 @@ import binascii
 import pytest
 
 import flextls
-from flextls.connection import TLSv10Connection
+from flextls.connection import SSLv30Connection
 from flextls.exception import NotEnoughData
 from flextls.protocol.record import Record, RecordSSLv3
 
@@ -90,7 +90,7 @@ class TestClientHello(object):
 class TestClientHello2(object):
 
     def test_get_record(self):
-        con = TLSv10Connection(
+        con = SSLv30Connection(
             protocol_version=flextls.registry.version.SSLv30
         )
 
