@@ -9,6 +9,10 @@ from flextls.field import ServerNameListField
 
 
 class Extension(Protocol):
+    """
+    Handle TLS and DTLS Extensions
+    """
+
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -27,6 +31,11 @@ class Extension(Protocol):
 
 
 class ServerNameIndication(Protocol):
+    """
+    Handle Server Name Indication extension
+
+    * RFC6066 (Section 3)
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -54,6 +63,9 @@ Extension.add_payload_type(0x0000, ServerNameIndication)
 
 
 class Heartbeat(Protocol):
+    """
+    Handle Heartbeat extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -73,6 +85,9 @@ Extension.add_payload_type(0x000f, Heartbeat)
 
 
 class EllipticCurves(Protocol):
+    """
+    Handle Elliptic Curves extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -87,6 +102,9 @@ Extension.add_payload_type(0x000a, EllipticCurves)
 
 
 class EcPointFormats(Protocol):
+    """
+    Handle Elliptic Curves Point Format extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -101,6 +119,9 @@ Extension.add_payload_type(0x000b, EcPointFormats)
 
 
 class SignatureAlgorithms(Protocol):
+    """
+    Handle Signature Algorithm extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -115,6 +136,9 @@ Extension.add_payload_type(0x000d, SignatureAlgorithms)
 
 
 class SessionTicketTLS(Protocol):
+    """
+    Handle Session Ticket extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [

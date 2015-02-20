@@ -12,6 +12,9 @@ from flextls.protocol import Protocol
 
 
 class DTLSv10Handshake(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Handshake protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -90,6 +93,9 @@ class DTLSv10Handshake(Protocol):
 
 
 class DTLSv10ClientHello(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -107,6 +113,9 @@ DTLSv10Handshake.add_payload_type(1, DTLSv10ClientHello)
 
 
 class DTLSv10HelloVerifyRequest(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Hello Verify Request messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -119,6 +128,9 @@ DTLSv10Handshake.add_payload_type(3, DTLSv10HelloVerifyRequest)
 
 
 class Handshake(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Handshake protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -146,6 +158,9 @@ class Handshake(Protocol):
 
 
 class ClientHello(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -162,6 +177,9 @@ Handshake.add_payload_type(1, ClientHello)
 
 
 class ServerHello(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Server Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -179,6 +197,9 @@ Handshake.add_payload_type(2, ServerHello)
 
 
 class ServerCertificate(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Certificate messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -191,6 +212,9 @@ Handshake.add_payload_type(11, ServerCertificate)
 
 
 class ServerKeyExchange(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Key Exchange messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -203,6 +227,9 @@ Handshake.add_payload_type(12, ServerKeyExchange)
 
 
 class ServerHelloDone(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Hello Done messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -213,6 +240,9 @@ Handshake.add_payload_type(14, ServerHelloDone)
 
 
 class ClientKeyExchange(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Client Key Exchange messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -223,6 +253,9 @@ Handshake.add_payload_type(16, ClientKeyExchange)
 
 
 class SSLv2ClientHello(Protocol):
+    """
+    Handle SSLv2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -281,6 +314,9 @@ class SSLv2ClientHello(Protocol):
 
 
 class SSLv2ServerHello(Protocol):
+    """
+    Handle SSLv2 Server Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None

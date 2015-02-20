@@ -3,6 +3,9 @@ from flextls.protocol import Protocol
 
 
 class ChangeCipherSpec(Protocol):
+    """
+    Handle Change Cipher Spec Protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [

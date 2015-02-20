@@ -35,7 +35,9 @@ class Record(Protocol):
 
 
 class RecordSSLv2(Protocol):
-
+    """
+    Handle the SSLv2 Record layer.
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.length = 0
@@ -122,7 +124,9 @@ class RecordSSLv2(Protocol):
 
 
 class RecordDTLSv10(Protocol):
-
+    """
+    Handle DTLS 1.0 and DTLS 1.2 Record layer.
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -147,7 +151,9 @@ class RecordDTLSv10(Protocol):
 
 
 class RecordSSLv3(Protocol):
-
+    """
+    Handle the SSLv3 and TLS 1.0, 1.1 and 1.2 Record layer
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [

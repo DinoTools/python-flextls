@@ -3,6 +3,11 @@ from flextls.protocol import Protocol
 
 
 class Heartbeat(Protocol):
+    """
+    Handle Heartbeat Request and Response Messages
+
+    * RFC6520
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [

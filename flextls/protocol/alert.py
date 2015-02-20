@@ -3,6 +3,11 @@ from flextls.protocol import Protocol
 
 
 class Alert(Protocol):
+    """
+    Handle Alert protocol
+
+    * RFC5246 (Section 7.2)
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [

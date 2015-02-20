@@ -6,6 +6,9 @@ from flextls.exception import NotEnoughData
 
 
 class Protocol(object):
+    """
+    Base Class to decode protocols.
+    """
     payload_list = None
 
     def __init__(self, connection_state=None):
