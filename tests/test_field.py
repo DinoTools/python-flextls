@@ -176,6 +176,11 @@ class TestEnumFields(object):
         with pytest.raises(TypeError):
             f.value = []
 
+        with pytest.raises(TypeError):
+            f.set_value([])
+
+        f.set_value([], True)
+
         assert f.dissect(b"\x80") == b""
         assert f.value == 128
 
@@ -218,6 +223,11 @@ class TestEnumFields(object):
 
         with pytest.raises(TypeError):
             f.value = []
+
+        with pytest.raises(TypeError):
+            f.set_value([])
+
+        f.set_value([], True)
 
         assert f.dissect(b"\x80\00") == b""
         assert f.value == 32768
