@@ -7,7 +7,7 @@ from flextls.protocol.record import RecordDTLSv10
 from flextls.protocol.handshake import DTLSv10Handshake
 from flextls.exception import NotEnoughData
 from flextls.exception import NotEnoughData, WrongProtocolVersion
-from flextls.protocol.record import RecordSSLv3
+from flextls.protocol.record import SSLv3Record
 from flextls.protocol.handshake import Handshake
 
 
@@ -158,7 +158,7 @@ class BaseTLSConnection(BaseConnection):
     def _decode_record_payload(self):
         while len(self._cur_record_data) > 0:
             try:
-                (obj, data) = RecordSSLv3.decode_raw_payload(
+                (obj, data) = SSLv3Record.decode_raw_payload(
                     self._cur_record_type,
                     self._cur_record_data,
                     payload_auto_decode=True
@@ -173,7 +173,7 @@ class BaseTLSConnection(BaseConnection):
         self._raw_stream_data += data
         while True:
             try:
-                (obj, data) = RecordSSLv3.decode(
+                (obj, data) = SSLv3Record.decode(
                     self._raw_stream_data,
                     payload_auto_decode=False
                 )
@@ -211,7 +211,7 @@ class BaseTLSConnection(BaseConnection):
         pkgs = []
         for record in records:
             if isinstance(record, Protocol):
-                tls_record = RecordSSLv3()
+                tls_record = SSLv3Record()
                 ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
                 tls_record.version.major = ver_major
                 tls_record.version.minor = ver_minor

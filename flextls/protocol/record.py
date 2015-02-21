@@ -26,7 +26,7 @@ class Record(Protocol):
                 connection_state=connection_state
             )
         elif six.indexbytes(data, 1) == 0x03:
-            obj = RecordSSLv3(
+            obj = SSLv3Record(
                 connection_state=connection_state
             )
 
@@ -150,7 +150,7 @@ class RecordDTLSv10(Protocol):
         self.payload_length_field = "length"
 
 
-class RecordSSLv3(Protocol):
+class SSLv3Record(Protocol):
     """
     Handle the SSLv3 and TLS 1.0, 1.1 and 1.2 Record layer
     """
@@ -179,7 +179,7 @@ RecordDTLSv10.add_payload_type(21, Alert)
 RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
-RecordSSLv3.add_payload_type(20, ChangeCipherSpec)
-RecordSSLv3.add_payload_type(21, Alert)
-RecordSSLv3.add_payload_type(22, Handshake)
-RecordSSLv3.add_payload_type(24, Heartbeat)
+SSLv3Record.add_payload_type(20, ChangeCipherSpec)
+SSLv3Record.add_payload_type(21, Alert)
+SSLv3Record.add_payload_type(22, Handshake)
+SSLv3Record.add_payload_type(24, Heartbeat)
