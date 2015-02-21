@@ -154,24 +154,31 @@ class EnumField(Field):
         self.enums = enums
         Field.__init__(self, name, default, fmt)
 
-    def get_value_name(self):
+    def get_value_name(self, pretty=False):
         """
         Get the name of the value
 
+        :param Boolean pretty: Return the name in a pretty format
         :return: The name
         :rtype: String
         """
-        return "%s (%x)" % (
-            self.enums.get(self._value, 'n/a'),
-            self._value
-        )
+        if pretty:
+            return "%s (%x)" % (
+                self.enums.get(self._value, "n/a"),
+                self._value
+            )
+
+        return self.enums.get(self._value, "n/a")
 
     def set_value(self, value, force=False):
         """
         Set the value.
 
-        :param value: The value to set. Must be in the enum list.
-        :param force: Set the value without checking it
+        :param String|Integer value: The value to set. Must be in the enum list.
+        :param Boolean force: Set the value without checking it
+
+        :raises ValueError: If value name given but it isn't available
+        :raises TypeError: If value is not String or Integer
         """
         if force:
             self._value = value
