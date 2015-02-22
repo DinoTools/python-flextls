@@ -34,6 +34,33 @@ class Record(Protocol):
         return (obj, data)
 
 
+class DTLSv10Record(Protocol):
+    """
+    Handle DTLS 1.0 and DTLS 1.2 Record layer.
+    """
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            UInt8EnumField(
+                "content_type",
+                None,
+                {
+                    20: "change_cipher_spec",
+                    21: "alert",
+                    22: "handshake",
+                    23: "application_data",
+                    255: None
+                }
+            ),
+            VersionField("version"),
+            UInt16Field("epoch", 0),
+            UInt48Field("sequence_number", 0),
+            UInt16Field("length", 0),
+        ]
+        self.payload_identifier_field = "content_type"
+        self.payload_length_field = "length"
+
+
 class SSLv2Record(Protocol):
     """
     Handle the SSLv2 Record layer.
@@ -121,33 +148,6 @@ class SSLv2Record(Protocol):
             self.payload = obj
 
         return data
-
-
-class DTLSv10Record(Protocol):
-    """
-    Handle DTLS 1.0 and DTLS 1.2 Record layer.
-    """
-    def __init__(self, **kwargs):
-        Protocol.__init__(self, **kwargs)
-        self.fields = [
-            UInt8EnumField(
-                "content_type",
-                None,
-                {
-                    20: "change_cipher_spec",
-                    21: "alert",
-                    22: "handshake",
-                    23: "application_data",
-                    255: None
-                }
-            ),
-            VersionField("version"),
-            UInt16Field("epoch", 0),
-            UInt48Field("sequence_number", 0),
-            UInt16Field("length", 0),
-        ]
-        self.payload_identifier_field = "content_type"
-        self.payload_length_field = "length"
 
 
 class SSLv3Record(Protocol):
