@@ -3,7 +3,7 @@ The class in this python module can be used to handle SSL/TLS/DTLS connections.
 """
 from flextls import helper
 from flextls.protocol import Protocol
-from flextls.protocol.record import RecordDTLSv10
+from flextls.protocol.record import DTLSv10Record
 from flextls.protocol.handshake import DTLSv10Handshake
 from flextls.exception import NotEnoughData
 from flextls.exception import NotEnoughData, WrongProtocolVersion
@@ -81,7 +81,7 @@ class BaseDTLSConnection(BaseConnection):
     def decode(self, data):
         while True and len(data) > 0:
             try:
-                (obj, data) = RecordDTLSv10.decode(
+                (obj, data) = DTLSv10Record.decode(
                     data,
                     payload_auto_decode=False
                 )
@@ -96,7 +96,7 @@ class BaseDTLSConnection(BaseConnection):
                     raise WrongProtocolVersion(
                         record=obj
                     )
-                (record, tmp_data) = RecordDTLSv10.decode_raw_payload(obj.content_type, obj.payload, payload_auto_decode=False)
+                (record, tmp_data) = DTLSv10Record.decode_raw_payload(obj.content_type, obj.payload, payload_auto_decode=False)
 
                 self._process(record)
 
@@ -117,7 +117,7 @@ class BaseDTLSConnection(BaseConnection):
                 record.message_seq = self._handshake_next_send_seq
                 self._handshake_next_send_seq += 1
 
-            dtls_record = RecordDTLSv10()
+            dtls_record = DTLSv10Record()
             ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
             dtls_record.version.major = ver_major
             dtls_record.version.minor = ver_minor

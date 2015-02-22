@@ -123,7 +123,7 @@ class RecordSSLv2(Protocol):
         return data
 
 
-class RecordDTLSv10(Protocol):
+class DTLSv10Record(Protocol):
     """
     Handle DTLS 1.0 and DTLS 1.2 Record layer.
     """
@@ -175,8 +175,8 @@ class SSLv3Record(Protocol):
         self.payload_length_field = "length"
 
 
-RecordDTLSv10.add_payload_type(21, Alert)
-RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
+DTLSv10Record.add_payload_type(21, Alert)
+DTLSv10Record.add_payload_type(22, DTLSv10Handshake)
 RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
 RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
 SSLv3Record.add_payload_type(20, ChangeCipherSpec)

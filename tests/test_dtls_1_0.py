@@ -7,19 +7,19 @@ from flextls.connection import DTLSv10Connection
 from flextls.exception import NotEnoughData
 from flextls.protocol.handshake import DTLSv10Handshake
 from flextls.protocol.handshake import ServerCertificate
-from flextls.protocol.record import Record, RecordDTLSv10
+from flextls.protocol.record import Record, DTLSv10Record
 
 
 class TestDTLSv10(object):
     def test_empty_data(self):
         with pytest.raises(NotEnoughData):
-            RecordDTLSv10().decode(b"")
+            DTLSv10Record().decode(b"")
 
     def test_not_enough_data(self):
         # Handshake, DTLSv1.0, Epoch 0, Sequence Number 0, Length 205
         data = binascii.unhexlify(b"16feff000000000000000000cd")
         with pytest.raises(NotEnoughData):
-            RecordDTLSv10().decode(data)
+            DTLSv10Record().decode(data)
         #
         assert binascii.hexlify(data) == b"16feff000000000000000000cd"
 
@@ -58,7 +58,7 @@ class TestCertificate(object):
         data += b"0b0002ac00020000000002ac"
         data += self._cert
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
@@ -140,7 +140,7 @@ class TestClientHello(object):
         data += b"0007001400150004000500120013000100020003"
         data += b"000f0010001100230000000f000101"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
 
         assert record.content_type == 22
 
@@ -191,7 +191,7 @@ class TestClientHello(object):
         data += b"0007001400150004000500120013000100020003"
         data += b"000f0010001100230000000f000101"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
@@ -244,7 +244,7 @@ class TestClientKeyExchange(object):
                 b"3b7d9050fd55bc74c37f36a8d4c6773b95314fe268e0385e490ef73079" \
                 b"c405f54c61265e"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
@@ -280,7 +280,7 @@ class TestHelloVerifyRequest(object):
         # Cookie Length: 20, Cockie (20 bytes)
         data += b"142c24633bb13af58be4a0f50e47767cfa93e63515"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
 
         assert len(data) == 0
 
@@ -323,7 +323,7 @@ class TestServerHello(object):
         data += b"0016ff01000100000b0004030001020023000000"
         data += b"0f000101"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
@@ -365,7 +365,7 @@ class TestServerHelloDone(object):
         # Server Hello Done, Length 12, Message Sequence 4, Fragment Offset 0, Fragment Length 0
         data += b"0e0000000004000000000000"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
@@ -413,7 +413,7 @@ class TestServerKeyExchange(object):
                 b"8e38410c5ef6bec7acf6eda364c3d0afdddaef7b6d9745dc514bcb7241" \
                 b"0468624094790cf054475dd6"
 
-        (record, data) = RecordDTLSv10().decode(binascii.unhexlify(data))
+        (record, data) = DTLSv10Record().decode(binascii.unhexlify(data))
         assert len(data) == 0
 
         assert record.content_type == 22
