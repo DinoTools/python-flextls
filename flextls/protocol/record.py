@@ -6,7 +6,7 @@ import struct
 import six
 
 from flextls.exception import NotEnoughData
-from flextls.field import UByteEnumField, UShortField, UInt48Field, VersionField
+from flextls.field import UInt8EnumField, UInt16Field, UInt48Field, VersionField
 from flextls.protocol import Protocol
 from flextls.protocol.alert import Alert
 from flextls.protocol.change_cipher_spec import ChangeCipherSpec
@@ -22,11 +22,11 @@ class Record(Protocol):
             raise NotEnoughData("Not enough data to decode header")
 
         if six.indexbytes(data, 3) == 0x00 and six.indexbytes(data, 4) == 0x02:
-            obj = RecordSSLv2(
+            obj = SSLv2Record(
                 connection_state=connection_state
             )
         elif six.indexbytes(data, 1) == 0x03:
-            obj = RecordSSLv3(
+            obj = SSLv3Record(
                 connection_state=connection_state
             )
 
@@ -34,8 +34,37 @@ class Record(Protocol):
         return (obj, data)
 
 
-class RecordSSLv2(Protocol):
+class DTLSv10Record(Protocol):
+    """
+    Handle DTLS 1.0 and DTLS 1.2 Record layer.
+    """
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            UInt8EnumField(
+                "content_type",
+                None,
+                {
+                    20: "change_cipher_spec",
+                    21: "alert",
+                    22: "handshake",
+                    23: "application_data",
+                    255: None
+                }
+            ),
+            VersionField("version"),
+            UInt16Field("epoch", 0),
+            UInt48Field("sequence_number", 0),
+            UInt16Field("length", 0),
+        ]
+        self.payload_identifier_field = "content_type"
+        self.payload_length_field = "length"
 
+
+class SSLv2Record(Protocol):
+    """
+    Handle the SSLv2 Record layer.
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.length = 0
@@ -121,12 +150,14 @@ class RecordSSLv2(Protocol):
         return data
 
 
-class RecordDTLSv10(Protocol):
-
+class SSLv3Record(Protocol):
+    """
+    Handle the SSLv3 and TLS 1.0, 1.1 and 1.2 Record layer
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "content_type",
                 None,
                 {
@@ -138,42 +169,17 @@ class RecordDTLSv10(Protocol):
                 }
             ),
             VersionField("version"),
-            UShortField("epoch", 0),
-            UInt48Field("sequence_number", 0),
-            UShortField("length", 0),
+            UInt16Field("length", 0),
         ]
         self.payload_identifier_field = "content_type"
         self.payload_length_field = "length"
 
 
-class RecordSSLv3(Protocol):
-
-    def __init__(self, **kwargs):
-        Protocol.__init__(self, **kwargs)
-        self.fields = [
-            UByteEnumField(
-                "content_type",
-                None,
-                {
-                    20: "change_cipher_spec",
-                    21: "alert",
-                    22: "handshake",
-                    23: "application_data",
-                    255: None
-                }
-            ),
-            VersionField("version"),
-            UShortField("length", 0),
-        ]
-        self.payload_identifier_field = "content_type"
-        self.payload_length_field = "length"
-
-
-RecordDTLSv10.add_payload_type(21, Alert)
-RecordDTLSv10.add_payload_type(22, DTLSv10Handshake)
-RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
-RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
-RecordSSLv3.add_payload_type(20, ChangeCipherSpec)
-RecordSSLv3.add_payload_type(21, Alert)
-RecordSSLv3.add_payload_type(22, Handshake)
-RecordSSLv3.add_payload_type(24, Heartbeat)
+DTLSv10Record.add_payload_type(21, Alert)
+DTLSv10Record.add_payload_type(22, DTLSv10Handshake)
+SSLv2Record.add_payload_type(1, SSLv2ClientHello)
+SSLv2Record.add_payload_type(4, SSLv2ServerHello)
+SSLv3Record.add_payload_type(20, ChangeCipherSpec)
+SSLv3Record.add_payload_type(21, Alert)
+SSLv3Record.add_payload_type(22, Handshake)
+SSLv3Record.add_payload_type(24, Heartbeat)

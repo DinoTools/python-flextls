@@ -1,10 +1,22 @@
+from flextls import helper
+
+
 class NotEnoughData(IOError):
+    """
+    Not enough data to decode the next record or field.
+    """
     pass
 
 
 class WrongProtocolVersion(IOError):
+    """
+    Raised during a connection if the server/client returns a wrong protocol version.
+
+    :param String msg: Message
+    :param flextls.protocol.Protocol record: The decoded record
+    :param Integer protocol_version: Internal ID of the expected protocol version
+    """
     def __init__(self, msg=None, record=None, protocol_version=None):
-        from flextls import helper
         if msg is None:
             msg = "Wrong protocol version"
             msg_info = []

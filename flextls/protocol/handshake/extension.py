@@ -2,17 +2,21 @@
 
 """
 from flextls.protocol import Protocol
-from flextls.field import UByteField, UShortField, VectorListUByteField, VectorUShortField
-from flextls.field import UByteEnumField, UShortEnumField, VectorListUShortField
+from flextls.field import UInt8Field, UInt16Field, VectorListUInt8Field, VectorUInt16Field
+from flextls.field import UInt8EnumField, UInt16EnumField, VectorListUInt16Field
 from flextls.field import SignatureAndHashAlgorithmField
 from flextls.field import ServerNameListField
 
 
 class Extension(Protocol):
+    """
+    Handle TLS and DTLS Extensions
+    """
+
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UShortEnumField(
+            UInt16EnumField(
                 "type",
                 None,
                 {
@@ -20,13 +24,18 @@ class Extension(Protocol):
                     65535: None
                 }
             ),
-            UShortField("length", 0),
+            UInt16Field("length", 0),
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
 
 
 class ServerNameIndication(Protocol):
+    """
+    Handle Server Name Indication extension
+
+    * RFC6066 (Section 3)
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
@@ -54,10 +63,13 @@ Extension.add_payload_type(0x0000, ServerNameIndication)
 
 
 class Heartbeat(Protocol):
+    """
+    Handle Heartbeat extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "mode",
                 None,
                 {
@@ -73,12 +85,15 @@ Extension.add_payload_type(0x000f, Heartbeat)
 
 
 class EllipticCurves(Protocol):
+    """
+    Handle Elliptic Curves extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUShortField(
+            VectorListUInt16Field(
                 "elliptic_curve_list",
-                item_class=UShortField,
+                item_class=UInt16Field,
                 item_class_args=[None, None]
             ),
         ]
@@ -87,12 +102,15 @@ Extension.add_payload_type(0x000a, EllipticCurves)
 
 
 class EcPointFormats(Protocol):
+    """
+    Handle Elliptic Curves Point Format extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUByteField(
+            VectorListUInt8Field(
                 "point_format_list",
-                item_class=UByteField,
+                item_class=UInt8Field,
                 item_class_args=[None, None]
             ),
         ]
@@ -101,10 +119,13 @@ Extension.add_payload_type(0x000b, EcPointFormats)
 
 
 class SignatureAlgorithms(Protocol):
+    """
+    Handle Signature Algorithm extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorListUShortField(
+            VectorListUInt16Field(
                 "supported_signature_algorithms",
                 item_class=SignatureAndHashAlgorithmField,
                 item_class_args=[None, None]
@@ -115,10 +136,13 @@ Extension.add_payload_type(0x000d, SignatureAlgorithms)
 
 
 class SessionTicketTLS(Protocol):
+    """
+    Handle Session Ticket extension
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            VectorUShortField("data"),
+            VectorUInt16Field("data"),
         ]
 
     @classmethod

@@ -1,12 +1,15 @@
-from flextls.field import UByteEnumField
+from flextls.field import UInt8EnumField
 from flextls.protocol import Protocol
 
 
 class ChangeCipherSpec(Protocol):
+    """
+    Handle Change Cipher Spec Protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "type",
                 None,
                 {

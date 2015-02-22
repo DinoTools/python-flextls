@@ -1,7 +1,7 @@
 import binascii
 
 from flextls.protocol.heartbeat import Heartbeat
-from flextls.protocol.record import Record, RecordSSLv3
+from flextls.protocol.record import Record, SSLv3Record
 
 
 class TestHeartbeatResponse(object):
@@ -33,7 +33,7 @@ class TestHeartbeatResponse(object):
 
 class TestHeartbeatCreate(object):
     def test_heartbeat_type(self):
-        record = RecordSSLv3()
+        record = SSLv3Record()
         hb = Heartbeat()
         hb.type = 1
         hb.payload = b"Heartbeat"

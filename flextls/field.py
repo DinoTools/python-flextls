@@ -6,6 +6,13 @@ from flextls.exception import NotEnoughData
 
 
 class Field(object):
+    """
+    Base class for all fields. Used to extract additional information.
+
+    :param String name: Name of the field
+    :param Mixed default: Default field value
+    :param String fmt: Format string used to decode the data
+    """
     def __init__(self, name, default, fmt="H"):
         self._value = None
         self.set_value(default)
@@ -17,13 +24,22 @@ class Field(object):
         self.size = struct.calcsize(self.fmt)
 
     def assemble(self):
-#        print("---")
-#        print(self)
-#        print(self.fmt)
-#        print(self.value)
+        """
+        Assemble the field by using the given value.
+
+        :return: The assembled data
+        :rtype: bytes
+        """
         return struct.pack(self.fmt, self.value)
 
     def dissect(self, data):
+        """
+        Dissect the field.
+
+        :param bytes data: The data to extract the field value from
+        :return: The rest of the data not used to dissect the field value
+        :rtype: bytes
+        """
         if len(data) < self.size:
             raise NotEnoughData(
                 "Not enough data to decode field '%s' value" % self.name
@@ -33,26 +49,47 @@ class Field(object):
         return data[self.size:]
 
     def get_value(self):
+        """
+        Return the field value.
+
+        :return: The value of the field
+        :rtype: Mixed
+        """
         return self._value
 
     def set_value(self, value):
+        """
+        Set the value of the field
+
+        :param Mixed value: The value
+        """
         self._value = value
 
     value = property(get_value, set_value)
 
-## Numbers
+# Numbers
 
 
-class UByteField(Field):
+class UInt8Field(Field):
+    """
+    Field representing an 8-bit unsigned integer value(range: 0 through 255 decimal).
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "B")
 
-class UShortField(Field):
+
+class UInt16Field(Field):
+    """
+    Field representing an 16-bit unsigned integer value(range: 0 through 65535 decimal).
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "H")
 
 
-class UInteger3Field(Field):
+class UInt24Field(Field):
+    """
+    Field representing an 16-bit unsigned integer value.
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "BH")
 
@@ -72,6 +109,9 @@ class UInteger3Field(Field):
 
 
 class UInt48Field(Field):
+    """
+    Field representing an 48-bit unsigned integer value.
+    """
     def __init__(self, name, default):
         Field.__init__(self, name, default, "HI")
 
@@ -89,21 +129,57 @@ class UInt48Field(Field):
         self.value = (tmp[0] * (2 ** 32)) + tmp[1]
         return data[self.size:]
 
-## Enums
+
+class RandomField(Field):
+    """
+    Random data.
+    """
+    def __init__(self, name):
+        Field.__init__(self, name, default=b"A"*32, fmt="32s")
+
+
+# Enums
 
 
 class EnumField(Field):
+    """
+    The field should only use the defined values.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    :param String fmt: The format string
+    """
     def __init__(self, name, default, enums, fmt="H"):
         self.enums = enums
         Field.__init__(self, name, default, fmt)
 
-    def get_value_name(self):
-        return "%s (%x)" % (
-            self.enums.get(self._value, 'n/a'),
-            self._value
-        )
+    def get_value_name(self, pretty=False):
+        """
+        Get the name of the value
+
+        :param Boolean pretty: Return the name in a pretty format
+        :return: The name
+        :rtype: String
+        """
+        if pretty:
+            return "%s (%x)" % (
+                self.enums.get(self._value, "n/a"),
+                self._value
+            )
+
+        return self.enums.get(self._value, "n/a")
 
     def set_value(self, value, force=False):
+        """
+        Set the value.
+
+        :param String|Integer value: The value to set. Must be in the enum list.
+        :param Boolean force: Set the value without checking it
+
+        :raises ValueError: If value name given but it isn't available
+        :raises TypeError: If value is not String or Integer
+        """
         if force:
             self._value = value
             return
@@ -133,20 +209,42 @@ class EnumField(Field):
     value = property(Field.get_value, set_value)
 
 
-class UByteEnumField(EnumField):
-    def __init__(self, name, default, enum):
-        EnumField.__init__(self, name, default, enum, "B")
+class UInt8EnumField(EnumField):
+    """
+    The field should only use the defined values. The value must be an 8-Bit unsigned integer.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    """
+    def __init__(self, name, default, enums):
+        EnumField.__init__(self, name, default, enums, "B")
 
 
-class UShortEnumField(EnumField):
-    def __init__(self, name, default, enum):
-        EnumField.__init__(self, name, default, enum, "H")
+class UInt16EnumField(EnumField):
+    """
+    The field should only use the defined values. The value must be an 16-Bit unsigned integer.
+
+    :param String name: The name of the field
+    :param Mixed default: A value defined in the enums list
+    :param Dict enums: List of possible values.
+    """
+    def __init__(self, name, default, enums):
+        EnumField.__init__(self, name, default, enums, "H")
 
 
-## Vectors
+# Vectors
 
 
 class VectorListBaseField(object):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string
+    """
     def __init__(self, name, item_class=None, item_class_args=None, fmt="H"):
         self.name = name
         self.item_class = item_class
@@ -172,11 +270,7 @@ class VectorListBaseField(object):
             raise NotEnoughData(
                 "Not enough data to decode field '%s' value" % self.name
             )
-#        print(self.name)
-#        print(len_size)
-#        print(data)
         payload_size = struct.unpack(self.fmt, data[:len_size])[0]
-#        print(payload_size)
         data = data[len_size:]
 
         if len(data) < payload_size:
@@ -204,17 +298,44 @@ class VectorListBaseField(object):
         return self.items
 
 
-class VectorListUByteField(VectorListBaseField):
+class VectorListUInt8Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 8-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="B")
 
 
-class VectorListUShortField(VectorListBaseField):
+class VectorListUInt16Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 16-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="H")
 
 
-class VectorListInteger3Field(VectorListBaseField):
+class VectorListInt24Field(VectorListBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 24-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param flextls.field.Field item_class:
+    :param List item_class_args:
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, item_class=None, item_class_args=None):
         VectorListBaseField.__init__(self, name, item_class, item_class_args, fmt="BH")
 
@@ -251,37 +372,57 @@ class VectorListInteger3Field(VectorListBaseField):
         return data[payload_length:]
 
 
-class CertificateListField(VectorListInteger3Field):
+class CertificateListField(VectorListInt24Field):
+    """
+    List of certificates
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
-        VectorListInteger3Field.__init__(
+        VectorListInt24Field.__init__(
             self,
             name,
             CertificateField,
         )
 
 
-class CipherSuitesField(VectorListUShortField):
+class CipherSuitesField(VectorListUInt16Field):
+    """
+    List of cipher suites.
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             CipherSuiteField,
         )
 
 
-class ServerNameListField(VectorListUShortField):
+class ServerNameListField(VectorListUInt16Field):
+    """
+    List of server names
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             ServerNameField,
         )
 
 
-class ExtensionsField(VectorListUShortField):
+class ExtensionsField(VectorListUInt16Field):
+    """
+    List of extensions
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
         from flextls.protocol.handshake.extension import Extension
-        VectorListUShortField.__init__(
+        VectorListUInt16Field.__init__(
             self,
             name,
             Extension
@@ -290,17 +431,22 @@ class ExtensionsField(VectorListUShortField):
     def assemble(self):
         if len(self.items) == 0:
             return b""
-        return VectorListUShortField.assemble(self)
+        return VectorListUInt16Field.assemble(self)
 
     def dissect(self, data):
         if len(data) == 0:
             return data
-        return VectorListUShortField.dissect(self, data)
+        return VectorListUInt16Field.dissect(self, data)
 
 
-class CompressionMethodsField(VectorListUByteField):
+class CompressionMethodsField(VectorListUInt8Field):
+    """
+    List of compression methods
+
+    :param String name: The name of the field
+    """
     def __init__(self, name):
-        VectorListUByteField.__init__(
+        VectorListUInt8Field.__init__(
             self,
             name,
             CompressionMethodField,
@@ -308,6 +454,13 @@ class CompressionMethodsField(VectorListUByteField):
 
 
 class VectorBaseField(object):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+
+    :param String name: The name of the field
+    :param Bytes default: Default value of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name, default=b"", fmt="H", connection_state=None):
         self.name = name
         self.value = default
@@ -343,17 +496,38 @@ class VectorBaseField(object):
         return size
 
 
-class VectorUShortField(VectorBaseField):
-    def __init__(self, name):
-        VectorBaseField.__init__(self, name, fmt="H")
+class VectorUInt8Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 8-bit unsigned integer.
 
-
-class VectorUByteField(VectorBaseField):
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="B")
 
 
-class VectorInteger3Field(VectorBaseField):
+class VectorUInt16Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 16-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
+    def __init__(self, name):
+        VectorBaseField.__init__(self, name, fmt="H")
+
+
+class VectorInt24Field(VectorBaseField):
+    """
+    A vector as defined by the RFC is a single dimensioned array.
+    The length identifier of this vector is a 24-bit unsigned integer.
+
+    :param String name: The name of the field
+    :param String fmt: The format string of the length identifier
+    """
     def __init__(self, name):
         VectorBaseField.__init__(self, name, fmt="BH")
 
@@ -381,15 +555,32 @@ class VectorInteger3Field(VectorBaseField):
         return data[data_length:]
 
 
-class CertificateField(VectorInteger3Field):
+class CertificateField(VectorInt24Field):
+    """
+    A certificate.
+
+    :param String name: The name of the field
+    """
     def __init__(self, name="certificate"):
-        VectorInteger3Field.__init__(self, name)
+        VectorInt24Field.__init__(self, name)
 
 
-## Multipart
+class HostNameField(VectorUInt16Field):
+    """
+    The hostname.
+    """
+    pass
+
+# Multipart
 
 
 class MultiPartField(object):
+    """
+    A field consisting of more than one value.
+
+    :param String name: The name of the field
+    :param fields: List of sub fields
+    """
     payload_list = None
 
     def __init__(self, name, fields=[]):
@@ -443,9 +634,6 @@ class MultiPartField(object):
             )
 
         for field in self.fields:
-#            print(self)
-#            print(field)
-#            print(field.name)
             data = data + field.assemble()
 
         data = data + payload
@@ -455,8 +643,6 @@ class MultiPartField(object):
         for field in self.fields:
             data = field.dissect(data)
 
-        # print(self.payload_identifier_field)
-        # print(self.payload_length_field)
         if self.payload_identifier_field is not None:
             if self.payload_length_field is None:
                 payload_data = data
@@ -466,7 +652,6 @@ class MultiPartField(object):
                 payload_data = data[:payload_length]
                 data = data[payload_length:]
 
-            #print(payload_length)
             payload_class = None
             if self.payload_list is not None:
                 payload_class = self.payload_list.get(
@@ -498,10 +683,13 @@ class MultiPartField(object):
 
 
 class ServerNameField(MultiPartField):
+    """
+    The server name
+    """
     def __init__(self, name="test", **kwargs):
         MultiPartField.__init__(self, name, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "name_type",
                 None,
                 {
@@ -513,61 +701,62 @@ class ServerNameField(MultiPartField):
         self.payload_identifier_field = "name_type"
 
 
-class HostNameField(VectorUShortField):
-    pass
-
-
 ServerNameField.add_payload_type(0, HostNameField)
 
 
 class VersionField(MultiPartField):
+    """
+    The protocol version field.
+
+    :param String name: Name of the field
+    """
     def __init__(self, name):
         MultiPartField.__init__(
             self,
             name,
             [
-                UByteField("major", 3),
-                UByteField("minor", 0)
-            ]
-        )
-
-
-class RandomField(MultiPartField):
-    def __init__(self, name):
-        MultiPartField.__init__(
-            self,
-            name,
-            [
-                # ToDo: extract time stamp
-                Field("random_bytes", 0, fmt="32s")
+                UInt8Field("major", 3),
+                UInt8Field("minor", 0)
             ]
         )
 
 
 class SignatureAndHashAlgorithmField(MultiPartField):
+    """
+    Representing a signature and hash algorithm
+    """
     def __init__(self, name):
         MultiPartField.__init__(
             self,
             name,
             [
-                UByteField("hash", 0),
-                UByteField("signature", 0)
+                UInt8Field("hash", 0),
+                UInt8Field("signature", 0)
             ]
         )
 
 
-## Custom
+# Custom
 
-class CipherSuiteField(UShortField):
+class CipherSuiteField(UInt16Field):
+    """
+    A cipher suite
+    """
     def __init__(self, name="unnamed"):
-        UShortField.__init__(self, name, None)
+        UInt16Field.__init__(self, name, None)
 
 
-class SSLv2CipherSuiteField(UInteger3Field):
+class SSLv2CipherSuiteField(UInt24Field):
+    """
+    A cipher suite for SSLv2
+    """
     def __init__(self, name="unnamed"):
-        UInteger3Field.__init__(self, name, None)
+        UInt24Field.__init__(self, name, None)
 
 
-class CompressionMethodField(UByteField):
+class CompressionMethodField(UInt8Field):
+    """
+    Compression method
+    """
     def __init__(self, name="unnamed"):
-        UByteField.__init__(self, name, None)
+        UInt8Field.__init__(self, name, None)

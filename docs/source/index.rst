@@ -40,7 +40,11 @@ API Documentation
 .. toctree::
    :maxdepth: 2
 
+   api/connection
    api/exception
+   api/field
+   api/helper
+   api/protocol
 
 Indices and tables
 ==================

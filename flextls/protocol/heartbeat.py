@@ -1,12 +1,17 @@
-from flextls.field import UByteEnumField, UShortField
+from flextls.field import UInt8EnumField, UInt16Field
 from flextls.protocol import Protocol
 
 
 class Heartbeat(Protocol):
+    """
+    Handle Heartbeat Request and Response Messages
+
+    * RFC6520
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "type",
                 None,
                 {
@@ -15,7 +20,7 @@ class Heartbeat(Protocol):
                     255: None
                 }
             ),
-            UShortField("payload_length", 0)
+            UInt16Field("payload_length", 0)
         ]
         self.padding = b""
         self.payload_length_field = "payload_length"

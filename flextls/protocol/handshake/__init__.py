@@ -2,9 +2,9 @@
 The SSL/TLS Handshake Protocol
 """
 
-from flextls.field import UInteger3Field, UShortField, UByteField
-from flextls.field import UByteEnumField
-from flextls.field import VectorUByteField
+from flextls.field import UInt24Field, UInt16Field, UInt8Field
+from flextls.field import UInt8EnumField
+from flextls.field import VectorUInt8Field
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
 from flextls.field import CertificateListField
 from flextls.field import SSLv2CipherSuiteField
@@ -12,10 +12,13 @@ from flextls.protocol import Protocol
 
 
 class DTLSv10Handshake(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Handshake protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "type",
                 None,
                 {
@@ -33,10 +36,10 @@ class DTLSv10Handshake(Protocol):
                     255: None
                 }
             ),
-            UInteger3Field("length", 0),
-            UShortField("message_seq", 0),
-            UInteger3Field("fragment_offset", 0),
-            UInteger3Field("fragment_length", 0)
+            UInt24Field("length", 0),
+            UInt16Field("message_seq", 0),
+            UInt24Field("fragment_offset", 0),
+            UInt24Field("fragment_length", 0)
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
@@ -90,14 +93,17 @@ class DTLSv10Handshake(Protocol):
 
 
 class DTLSv10ClientHello(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
             VersionField("version"),
             RandomField("random"),
-            VectorUByteField("session_id"),
-            VectorUByteField("cookie"),
+            VectorUInt8Field("session_id"),
+            VectorUInt8Field("cookie"),
             CipherSuitesField("cipher_suites"),
             CompressionMethodsField("compression_methods"),
             ExtensionsField("extensions"),
@@ -107,22 +113,28 @@ DTLSv10Handshake.add_payload_type(1, DTLSv10ClientHello)
 
 
 class DTLSv10HelloVerifyRequest(Protocol):
+    """
+    Handle DTLS 1.0 and 1.2 Hello Verify Request messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
             VersionField("version"),
-            VectorUByteField("cookie")
+            VectorUInt8Field("cookie")
         ]
 
 DTLSv10Handshake.add_payload_type(3, DTLSv10HelloVerifyRequest)
 
 
 class Handshake(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Handshake protocol
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.fields = [
-            UByteEnumField(
+            UInt8EnumField(
                 "type",
                 None,
                 {
@@ -139,20 +151,23 @@ class Handshake(Protocol):
                     255: None
                 }
             ),
-            UInteger3Field("length", 0),
+            UInt24Field("length", 0),
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
 
 
 class ClientHello(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
             VersionField("version"),
             RandomField("random"),
-            VectorUByteField("session_id"),
+            VectorUInt8Field("session_id"),
             CipherSuitesField("cipher_suites"),
             CompressionMethodsField("compression_methods"),
             ExtensionsField("extensions"),
@@ -162,13 +177,16 @@ Handshake.add_payload_type(1, ClientHello)
 
 
 class ServerHello(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 Server Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
             VersionField("version"),
             RandomField("random"),
-            VectorUByteField("session_id"),
+            VectorUInt8Field("session_id"),
             CipherSuiteField("cipher_suite"),
             CompressionMethodField("compression_method"),
             ExtensionsField("extensions"),
@@ -179,6 +197,9 @@ Handshake.add_payload_type(2, ServerHello)
 
 
 class ServerCertificate(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Certificate messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -191,6 +212,9 @@ Handshake.add_payload_type(11, ServerCertificate)
 
 
 class ServerKeyExchange(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Key Exchange messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -203,6 +227,9 @@ Handshake.add_payload_type(12, ServerKeyExchange)
 
 
 class ServerHelloDone(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Server Hello Done messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -213,6 +240,9 @@ Handshake.add_payload_type(14, ServerHelloDone)
 
 
 class ClientKeyExchange(Protocol):
+    """
+    Handle SSLv3 and TLS 1.0, 1.1 and 1.2 and DLTS 1.0 and 1.2 Client Key Exchange messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
@@ -223,14 +253,17 @@ Handshake.add_payload_type(16, ClientKeyExchange)
 
 
 class SSLv2ClientHello(Protocol):
+    """
+    Handle SSLv2 Client Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
             VersionField("version"),
-            UShortField("cipher_suites_length", 0),
-            UShortField("session_id_length", 0),
-            UShortField("challenge_length", 0),
+            UInt16Field("cipher_suites_length", 0),
+            UInt16Field("session_id_length", 0),
+            UInt16Field("challenge_length", 0),
         ]
         self.cipher_suites = []
         self.session_id = b""
@@ -281,16 +314,19 @@ class SSLv2ClientHello(Protocol):
 
 
 class SSLv2ServerHello(Protocol):
+    """
+    Handle SSLv2 Server Hello messages
+    """
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
         self.fields = [
-            UByteField("session_id_hit", 0),
-            UByteField("certificate_type", 0),
+            UInt8Field("session_id_hit", 0),
+            UInt8Field("certificate_type", 0),
             VersionField("version"),
-            UShortField("certificate_length", 0),
-            UShortField("cipher_suites_length", 0),
-            UShortField("connection_id_length", 0),
+            UInt16Field("certificate_length", 0),
+            UInt16Field("cipher_suites_length", 0),
+            UInt16Field("connection_id_length", 0),
         ]
         self.certificate = b""
         self.cipher_suites = []

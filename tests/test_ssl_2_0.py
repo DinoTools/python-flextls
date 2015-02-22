@@ -3,19 +3,19 @@ import binascii
 import pytest
 
 from flextls.exception import NotEnoughData
-from flextls.protocol.record import Record, RecordSSLv2
+from flextls.protocol.record import Record, SSLv2Record
 
 
 class TestSSLv2(object):
     def test_empty_data(self):
         with pytest.raises(NotEnoughData):
-            RecordSSLv2().decode(b"")
+            SSLv2Record().decode(b"")
 
     def test_not_enough_data(self):
         # Length: 46, Client Hello
         data = binascii.unhexlify(b"802e01")
         with pytest.raises(NotEnoughData):
-            RecordSSLv2().decode(data)
+            SSLv2Record().decode(data)
         #
         assert binascii.hexlify(data) == b"802e01"
 
@@ -117,7 +117,7 @@ class TestServerHello(object):
         # Connection ID
         data += b"091968f2228096a12b87ee83f96669c2"
 
-        (record, data) = RecordSSLv2().decode(binascii.unhexlify(data))
+        (record, data) = SSLv2Record().decode(binascii.unhexlify(data))
         return record
 
     def test_record_length(self):
