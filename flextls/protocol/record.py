@@ -22,7 +22,7 @@ class Record(Protocol):
             raise NotEnoughData("Not enough data to decode header")
 
         if six.indexbytes(data, 3) == 0x00 and six.indexbytes(data, 4) == 0x02:
-            obj = RecordSSLv2(
+            obj = SSLv2Record(
                 connection_state=connection_state
             )
         elif six.indexbytes(data, 1) == 0x03:
@@ -34,7 +34,7 @@ class Record(Protocol):
         return (obj, data)
 
 
-class RecordSSLv2(Protocol):
+class SSLv2Record(Protocol):
     """
     Handle the SSLv2 Record layer.
     """
@@ -177,8 +177,8 @@ class SSLv3Record(Protocol):
 
 DTLSv10Record.add_payload_type(21, Alert)
 DTLSv10Record.add_payload_type(22, DTLSv10Handshake)
-RecordSSLv2.add_payload_type(1, SSLv2ClientHello)
-RecordSSLv2.add_payload_type(4, SSLv2ServerHello)
+SSLv2Record.add_payload_type(1, SSLv2ClientHello)
+SSLv2Record.add_payload_type(4, SSLv2ServerHello)
 SSLv3Record.add_payload_type(20, ChangeCipherSpec)
 SSLv3Record.add_payload_type(21, Alert)
 SSLv3Record.add_payload_type(22, Handshake)
