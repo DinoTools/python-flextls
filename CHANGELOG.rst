@@ -9,6 +9,9 @@ Changelog
 * Add support for DTLSv 1.0
 * Add support to handle fragmentation on the record layer (TLS)
 * Add support to handle fragmented handshake messages (DTLS)
+* Change class names for consistent names
+* Add additional tests
+* Remove deprecated and unused code
 
 
 0.2 - 2014-11-17
