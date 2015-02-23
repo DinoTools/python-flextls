@@ -52,6 +52,10 @@ class Registry(RegistryNamespace):
             "ec.named_curves",
             ECNamedCurveRegistry()
         )
+        self.register(
+            "ec.point_formats",
+            ECPointFormatRegistry()
+        )
 
         reg = ProtocolVersionRegistry()
         self.register(
@@ -79,6 +83,7 @@ class Registry(RegistryNamespace):
         self.register("version.DTLS", dtls_id)
         self.register("version.SSL", ssl_id)
         self.register("version.TLS", tls_id)
+
 
 class BaseRegistry(object):
     def __init__(self):
@@ -235,6 +240,15 @@ class ECNamedCurveRegistry(BaseRegistry):
             self.load(ec_named_curves, replace=True)
 
 
+class ECPointFormatRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = ECPointFormat
+        if auto_load:
+            from flextls._registry.data import ec_point_formats
+            self.load(ec_point_formats, replace=True)
+
+
 class CipherSuite(object):
     def __init__(self, id, protocol=None, name=None, bits=None, alg_bits=None,
                  key_exchange=None, authentication=None, encryption=None,
@@ -277,6 +291,16 @@ class TLSSignatureAlgorithm(BaseRegistryItem):
 
 
 class ECNamedCurve(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
+
+
+class ECPointFormat(BaseRegistryItem):
+    """
+    EC Point Format
+
+    RFC4492
+    """
     def __init__(self, id, **kwargs):
         BaseRegistryItem.__init__(self, id, **kwargs)
 

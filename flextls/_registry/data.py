@@ -3842,3 +3842,24 @@ ec_named_curves = [
         "references": ["RFC4492"],
     },
 ]
+
+ec_point_formats = [
+    {
+        "id": 0,
+        "name": "uncompressed",
+        "dtls": True,
+        "references": ["RFC4492"],
+    },
+    {
+        "id": 1,
+        "name": "ansiX962_compressed_prime",
+        "dtls": True,
+        "references": ["RFC4492"],
+    },
+    {
+        "id": 2,
+        "name": "ansiX962_compressed_char2",
+        "dtls": True,
+        "references": ["RFC4492"],
+    },
+]
