@@ -18,6 +18,7 @@ class BaseConnection(object):
     def __init__(self, protocol_version):
         self._decoded_records = []
         self._cur_protocol_version = protocol_version
+        self.state = None
 
     def clear_records(self):
         self._decoded_records.clear()
@@ -33,6 +34,24 @@ class BaseConnection(object):
 
     def pop_record(self):
         return self._decoded_records.pop(0)
+
+
+class BaseConnectionState(object):
+    def __init__(self):
+        self.cipher_suite = None
+        self.compression_algorithm = None
+        self.client_random = None
+        self.server_random = None
+
+    def update(self, record):
+        from flextls.protocol.handshake import ClientHello, ServerHello
+        if isinstance(record, Handshake):
+            if isinstance(record.payload, ClientHello):
+                self.client_random = record.payload.random
+            if isinstance(record.payload, ServerHello):
+                self.server_random = record.payload.random
+                self.compression_algorithm = record.payload.compression_method
+                self.cipher_suite = record.payload.cipher_suite
 
 
 class BaseDTLSConnection(BaseConnection):
@@ -155,6 +174,8 @@ class BaseTLSConnection(BaseConnection):
         self._cur_record_type = None
         self._cur_record_data = b""
 
+        self.state = BaseConnectionState()
+
     def _decode_record_payload(self):
         while len(self._cur_record_data) > 0:
             try:
@@ -164,6 +185,7 @@ class BaseTLSConnection(BaseConnection):
                     payload_auto_decode=True
                 )
                 self._cur_record_data = data
+                self.state.update(obj)
                 self._decoded_records.append(obj)
 
             except NotEnoughData:
@@ -211,6 +233,7 @@ class BaseTLSConnection(BaseConnection):
         pkgs = []
         for record in records:
             if isinstance(record, Protocol):
+                self.state.update(record)
                 tls_record = SSLv3Record()
                 ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
                 tls_record.version.major = ver_major
