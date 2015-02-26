@@ -461,7 +461,7 @@ class VectorBaseField(object):
     :param Bytes default: Default value of the field
     :param String fmt: The format string of the length identifier
     """
-    def __init__(self, name, default=b"", fmt="H", connection_state=None):
+    def __init__(self, name, default=b"", fmt="H", connection=None):
         self.name = name
         self.value = default
         if fmt[0] in "@=<>!":

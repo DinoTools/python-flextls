@@ -102,6 +102,7 @@ class BaseDTLSConnection(BaseConnection):
             try:
                 (obj, data) = DTLSv10Record.decode(
                     data,
+                    connection=self,
                     payload_auto_decode=False
                 )
 
@@ -136,7 +137,9 @@ class BaseDTLSConnection(BaseConnection):
                 record.message_seq = self._handshake_next_send_seq
                 self._handshake_next_send_seq += 1
 
-            dtls_record = DTLSv10Record()
+            dtls_record = DTLSv10Record(
+                connection=self
+            )
             ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
             dtls_record.version.major = ver_major
             dtls_record.version.minor = ver_minor
@@ -197,6 +200,7 @@ class BaseTLSConnection(BaseConnection):
             try:
                 (obj, data) = SSLv3Record.decode(
                     self._raw_stream_data,
+                    connection=self,
                     payload_auto_decode=False
                 )
                 version = helper.get_version_by_version_id((
@@ -234,7 +238,9 @@ class BaseTLSConnection(BaseConnection):
         for record in records:
             if isinstance(record, Protocol):
                 self.state.update(record)
-                tls_record = SSLv3Record()
+                tls_record = SSLv3Record(
+                    connection=self
+                )
                 ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
                 tls_record.version.major = ver_major
                 tls_record.version.minor = ver_minor

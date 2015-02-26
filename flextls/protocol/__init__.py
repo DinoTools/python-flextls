@@ -11,9 +11,9 @@ class Protocol(object):
     """
     payload_list = None
 
-    def __init__(self, connection_state=None):
+    def __init__(self, connection=None):
         self.fields = []
-        self._connection_state = connection_state
+        self._connection = connection
         self.payload = None
         self.payload_identifier_field = None
         self.payload_length_field = None
@@ -79,9 +79,9 @@ class Protocol(object):
         return data
 
     @classmethod
-    def decode(cls, data, connection_state=None, payload_auto_decode=True):
+    def decode(cls, data, connection=None, payload_auto_decode=True):
         obj = cls(
-            connection_state=connection_state
+            connection=connection
         )
         data = obj.dissect(
             data,
@@ -132,7 +132,7 @@ class Protocol(object):
             else:
                 (obj, payload_data) = payload_class.decode(
                     payload_data,
-                    connection_state=self._connection_state,
+                    connection=self._connection,
                     payload_auto_decode=payload_auto_decode
                 )
                 self.payload = obj
@@ -148,13 +148,13 @@ class Protocol(object):
 
         return payload_cls.decode(
             payload_data,
-            #connection_state=self._connection_state,
+            #connection=self._connection,
             payload_auto_decode=payload_auto_decode
         )
 
-    def dissect(self, data, connection_state=None, payload_auto_decode=True):
-        if connection_state is not None:
-            self._connection_state = connection_state
+    def dissect(self, data, connection=None, payload_auto_decode=True):
+        if connection is not None:
+            self._connection = connection
         # print(">>>")
         # print(self)
         # print(data)
