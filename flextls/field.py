@@ -736,6 +736,21 @@ class SignatureAndHashAlgorithmField(MultiPartField):
         )
 
 
+class ServerDHParamsField(MultiPartField):
+    """
+    Representing a signature and hash algorithm
+    """
+    def __init__(self, name):
+        MultiPartField.__init__(
+            self,
+            name,
+            [
+                VectorUInt16Field("dh_p"),
+                VectorUInt16Field("dh_g"),
+                VectorUInt16Field("dh_Ys")
+            ]
+        )
+
 # Custom
 
 class CipherSuiteField(UInt16Field):

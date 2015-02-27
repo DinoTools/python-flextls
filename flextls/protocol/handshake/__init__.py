@@ -2,6 +2,7 @@
 The SSL/TLS Handshake Protocol
 """
 
+import flextls
 from flextls.field import UInt24Field, UInt16Field, UInt8Field
 from flextls.field import UInt8EnumField
 from flextls.field import VectorUInt8Field
@@ -218,8 +219,34 @@ class ServerKeyExchange(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
+        self.fields = []
+
+    def decode_payload(self, data=None, payload_auto_decode=True):
+        if self._connection is None:
+            self.payload = data
+            return b""
+
+        cipher_suite = flextls.registry.tls.cipher_suites.get(self._connection.state.cipher_suite)
+        if cipher_suite.key_exchange == "DH_anon":
+            (obj, data) = ServerKeyExchangeDHAnon.decode(
+                data,
+                connection=self._connection
+            )
+        else:
+            obj = data
+            data = b""
+
+        self.payload = obj
+        return data
+
+
+class ServerKeyExchangeDHAnon(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        from flextls.field import ServerDHParamsField
         self.fields = [
-            # ToDo: need a state object to parse the server params
+            ServerDHParamsField("params")
         ]
 
 DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
