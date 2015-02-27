@@ -185,7 +185,8 @@ class BaseTLSConnection(BaseConnection):
                 (obj, data) = SSLv3Record.decode_raw_payload(
                     self._cur_record_type,
                     self._cur_record_data,
-                    payload_auto_decode=True
+                    payload_auto_decode=True,
+                    connection=self
                 )
                 self._cur_record_data = data
                 self.state.update(obj)

@@ -140,7 +140,7 @@ class Protocol(object):
         return data
 
     @classmethod
-    def decode_raw_payload(cls, payload_type, payload_data, payload_auto_decode=False):
+    def decode_raw_payload(cls, payload_type, payload_data, payload_auto_decode=False, connection=None):
         payload_cls = cls.payload_list.get(payload_type)
         if payload_cls is None:
             # ToDo:
@@ -148,7 +148,7 @@ class Protocol(object):
 
         return payload_cls.decode(
             payload_data,
-            #connection=self._connection,
+            connection=connection,
             payload_auto_decode=payload_auto_decode
         )
 
