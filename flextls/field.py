@@ -738,7 +738,7 @@ class SignatureAndHashAlgorithmField(MultiPartField):
 
 class ServerDHParamsField(MultiPartField):
     """
-    Representing a signature and hash algorithm
+    RFC5246 Section 7.4.3. Server Key Exchange Message
     """
     def __init__(self, name):
         MultiPartField.__init__(
