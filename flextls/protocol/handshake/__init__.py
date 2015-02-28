@@ -229,7 +229,7 @@ class ServerKeyExchange(Protocol):
 
         cipher_suite = flextls.registry.tls.cipher_suites.get(self._connection.state.cipher_suite)
         cls = None
-        if cipher_suite.key_exchange == "DH_anon":
+        if cipher_suite.key_exchange in ("DH_anon", "DH_anon_EXPORT"):
             cls = ServerKeyExchangeDHAnon
         elif cipher_suite.key_exchange in ("DHE_RSA", "DHE_RSA_EXPORT"):
             cls = ServerKeyExchangeDHERSA
