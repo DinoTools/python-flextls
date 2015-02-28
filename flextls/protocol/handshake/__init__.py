@@ -5,8 +5,9 @@ The SSL/TLS Handshake Protocol
 import flextls
 from flextls.field import UInt24Field, UInt16Field, UInt8Field
 from flextls.field import UInt8EnumField
-from flextls.field import VectorUInt8Field
+from flextls.field import VectorUInt8Field, VectorUInt16Field
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
+from flextls.field import ServerDHParamsField
 from flextls.field import CertificateListField
 from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
@@ -227,8 +228,16 @@ class ServerKeyExchange(Protocol):
             return b""
 
         cipher_suite = flextls.registry.tls.cipher_suites.get(self._connection.state.cipher_suite)
+        cls = None
         if cipher_suite.key_exchange == "DH_anon":
-            (obj, data) = ServerKeyExchangeDHAnon.decode(
+            cls = ServerKeyExchangeDHAnon
+        elif cipher_suite.key_exchange in ("DHE_RSA", "DHE_RSA_EXPORT"):
+            cls = ServerKeyExchangeDHERSA
+        elif cipher_suite.key_exchange in ("DHE_DSS", "DHE_DSS_EXPORT"):
+            cls = ServerKeyExchangeDHEDSS
+
+        if cls is not None:
+            (obj, data) = cls.decode(
                 data,
                 connection=self._connection
             )
@@ -244,10 +253,24 @@ class ServerKeyExchangeDHAnon(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
-        from flextls.field import ServerDHParamsField
+
         self.fields = [
             ServerDHParamsField("params")
         ]
+
+
+class ServerKeyExchangeDHERSA(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            ServerDHParamsField("params"),
+            VectorUInt16Field("signed_params")
+        ]
+
+
+class ServerKeyExchangeDHEDSS(ServerKeyExchangeDHERSA):
+    pass
 
 DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
 Handshake.add_payload_type(12, ServerKeyExchange)
