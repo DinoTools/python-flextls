@@ -7,7 +7,7 @@ from flextls.field import UInt24Field, UInt16Field, UInt8Field
 from flextls.field import UInt8EnumField
 from flextls.field import VectorUInt8Field, VectorUInt16Field
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
-from flextls.field import ServerDHParamsField
+from flextls.field import ServerDHParamsField, ServerECDHParamsField
 from flextls.field import CertificateListField
 from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
@@ -235,6 +235,8 @@ class ServerKeyExchange(Protocol):
             cls = ServerKeyExchangeDHERSA
         elif cipher_suite.key_exchange in ("DHE_DSS", "DHE_DSS_EXPORT"):
             cls = ServerKeyExchangeDHEDSS
+        elif cipher_suite.key_exchange in ("ECDHE_RSA",):
+            cls = ServerKeyExchangeECDSA
 
         if cls is not None:
             (obj, data) = cls.decode(
@@ -271,6 +273,16 @@ class ServerKeyExchangeDHERSA(Protocol):
 
 class ServerKeyExchangeDHEDSS(ServerKeyExchangeDHERSA):
     pass
+
+
+class ServerKeyExchangeECDSA(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            ServerECDHParamsField("params"),
+            VectorUInt16Field("signed_params")
+        ]
 
 DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
 Handshake.add_payload_type(12, ServerKeyExchange)
