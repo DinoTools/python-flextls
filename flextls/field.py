@@ -787,6 +787,10 @@ class ECParametersField(Field):
         if curve_type == 0x03:
             self._value = ECParametersNamedCurveField("none")
             data = self._value.dissect(data)
+        else:
+            raise NotImplementedError(
+                "Decoding of KeyExchange message for curve 0x%.2X not implemented" % curve_type
+            )
         return data
 
 

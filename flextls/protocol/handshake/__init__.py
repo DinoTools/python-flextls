@@ -239,11 +239,15 @@ class ServerKeyExchange(Protocol):
             cls = ServerKeyExchangeECDSA
 
         if cls is not None:
-            (obj, data) = cls.decode(
-                data,
-                connection=self._connection
-            )
-        else:
+            try:
+                (obj, data) = cls.decode(
+                    data,
+                    connection=self._connection
+                )
+            except NotImplementedError:
+                cls = None
+
+        if cls is None:
             obj = data
             data = b""
 
