@@ -45,7 +45,7 @@ class BaseConnectionState(object):
 
     def update(self, record):
         from flextls.protocol.handshake import ClientHello, ServerHello
-        if isinstance(record, Handshake):
+        if isinstance(record, (Handshake, DTLSv10Handshake)):
             if isinstance(record.payload, ClientHello):
                 self.client_random = record.payload.random
             if isinstance(record.payload, ServerHello):
@@ -74,13 +74,21 @@ class BaseDTLSConnection(BaseConnection):
         self._record_next_send_seq = 0
         self._epoch = 0
 
+        self.state = BaseConnectionState()
+
     def _process(self, obj):
         if isinstance(obj, DTLSv10Handshake):
             self._process_handshake(obj)
         elif isinstance(obj, Protocol):
+            self.state.update(obj)
             self._decoded_records.append(obj)
 
     def _process_handshake(self, obj):
+        """
+
+        :param obj:
+        :type obj: flextls.protocol.handshake.DTLSv10Handshake
+        """
         if obj.message_seq != self._handshake_next_receive_seq:
             return
 
@@ -95,6 +103,7 @@ class BaseDTLSConnection(BaseConnection):
 
         obj.decode_payload()
         self._handshake_next_receive_seq += 1
+        self.state.update(obj)
         self._decoded_records.append(obj)
 
     def decode(self, data):
@@ -116,7 +125,12 @@ class BaseDTLSConnection(BaseConnection):
                     raise WrongProtocolVersion(
                         record=obj
                     )
-                (record, tmp_data) = DTLSv10Record.decode_raw_payload(obj.content_type, obj.payload, payload_auto_decode=False)
+                (record, tmp_data) = DTLSv10Record.decode_raw_payload(
+                    obj.content_type,
+                    obj.payload,
+                    connection=self,
+                    payload_auto_decode=False
+                )
 
                 self._process(record)
 
@@ -132,6 +146,8 @@ class BaseDTLSConnection(BaseConnection):
         for record in records:
             if not isinstance(record, Protocol):
                 raise TypeError("Record must be of type flextls.protocol.Protocol()")
+
+            self.state.update(record)
 
             if isinstance(record, DTLSv10Handshake):
                 record.message_seq = self._handshake_next_send_seq
