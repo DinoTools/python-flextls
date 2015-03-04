@@ -18,6 +18,7 @@ class BaseConnection(object):
     def __init__(self, protocol_version):
         self._decoded_records = []
         self._cur_protocol_version = protocol_version
+        self.state = None
 
     def clear_records(self):
         self._decoded_records.clear()
@@ -33,6 +34,24 @@ class BaseConnection(object):
 
     def pop_record(self):
         return self._decoded_records.pop(0)
+
+
+class BaseConnectionState(object):
+    def __init__(self):
+        self.cipher_suite = None
+        self.compression_algorithm = None
+        self.client_random = None
+        self.server_random = None
+
+    def update(self, record):
+        from flextls.protocol.handshake import ClientHello, ServerHello
+        if isinstance(record, (Handshake, DTLSv10Handshake)):
+            if isinstance(record.payload, ClientHello):
+                self.client_random = record.payload.random
+            if isinstance(record.payload, ServerHello):
+                self.server_random = record.payload.random
+                self.compression_algorithm = record.payload.compression_method
+                self.cipher_suite = record.payload.cipher_suite
 
 
 class BaseDTLSConnection(BaseConnection):
@@ -55,13 +74,21 @@ class BaseDTLSConnection(BaseConnection):
         self._record_next_send_seq = 0
         self._epoch = 0
 
+        self.state = BaseConnectionState()
+
     def _process(self, obj):
         if isinstance(obj, DTLSv10Handshake):
             self._process_handshake(obj)
         elif isinstance(obj, Protocol):
+            self.state.update(obj)
             self._decoded_records.append(obj)
 
     def _process_handshake(self, obj):
+        """
+
+        :param obj:
+        :type obj: flextls.protocol.handshake.DTLSv10Handshake
+        """
         if obj.message_seq != self._handshake_next_receive_seq:
             return
 
@@ -76,6 +103,7 @@ class BaseDTLSConnection(BaseConnection):
 
         obj.decode_payload()
         self._handshake_next_receive_seq += 1
+        self.state.update(obj)
         self._decoded_records.append(obj)
 
     def decode(self, data):
@@ -83,6 +111,7 @@ class BaseDTLSConnection(BaseConnection):
             try:
                 (obj, data) = DTLSv10Record.decode(
                     data,
+                    connection=self,
                     payload_auto_decode=False
                 )
 
@@ -96,7 +125,12 @@ class BaseDTLSConnection(BaseConnection):
                     raise WrongProtocolVersion(
                         record=obj
                     )
-                (record, tmp_data) = DTLSv10Record.decode_raw_payload(obj.content_type, obj.payload, payload_auto_decode=False)
+                (record, tmp_data) = DTLSv10Record.decode_raw_payload(
+                    obj.content_type,
+                    obj.payload,
+                    connection=self,
+                    payload_auto_decode=False
+                )
 
                 self._process(record)
 
@@ -113,11 +147,15 @@ class BaseDTLSConnection(BaseConnection):
             if not isinstance(record, Protocol):
                 raise TypeError("Record must be of type flextls.protocol.Protocol()")
 
+            self.state.update(record)
+
             if isinstance(record, DTLSv10Handshake):
                 record.message_seq = self._handshake_next_send_seq
                 self._handshake_next_send_seq += 1
 
-            dtls_record = DTLSv10Record()
+            dtls_record = DTLSv10Record(
+                connection=self
+            )
             ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
             dtls_record.version.major = ver_major
             dtls_record.version.minor = ver_minor
@@ -155,15 +193,19 @@ class BaseTLSConnection(BaseConnection):
         self._cur_record_type = None
         self._cur_record_data = b""
 
+        self.state = BaseConnectionState()
+
     def _decode_record_payload(self):
         while len(self._cur_record_data) > 0:
             try:
                 (obj, data) = SSLv3Record.decode_raw_payload(
                     self._cur_record_type,
                     self._cur_record_data,
-                    payload_auto_decode=True
+                    payload_auto_decode=True,
+                    connection=self
                 )
                 self._cur_record_data = data
+                self.state.update(obj)
                 self._decoded_records.append(obj)
 
             except NotEnoughData:
@@ -175,6 +217,7 @@ class BaseTLSConnection(BaseConnection):
             try:
                 (obj, data) = SSLv3Record.decode(
                     self._raw_stream_data,
+                    connection=self,
                     payload_auto_decode=False
                 )
                 version = helper.get_version_by_version_id((
@@ -211,7 +254,10 @@ class BaseTLSConnection(BaseConnection):
         pkgs = []
         for record in records:
             if isinstance(record, Protocol):
-                tls_record = SSLv3Record()
+                self.state.update(record)
+                tls_record = SSLv3Record(
+                    connection=self
+                )
                 ver_major, ver_minor = helper.get_tls_version(self._cur_protocol_version)
                 tls_record.version.major = ver_major
                 tls_record.version.minor = ver_minor

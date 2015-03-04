@@ -461,7 +461,7 @@ class VectorBaseField(object):
     :param Bytes default: Default value of the field
     :param String fmt: The format string of the length identifier
     """
-    def __init__(self, name, default=b"", fmt="H", connection_state=None):
+    def __init__(self, name, default=b"", fmt="H", connection=None):
         self.name = name
         self.value = default
         if fmt[0] in "@=<>!":
@@ -734,6 +734,86 @@ class SignatureAndHashAlgorithmField(MultiPartField):
                 UInt8Field("signature", 0)
             ]
         )
+
+
+class ServerDHParamsField(MultiPartField):
+    """
+    RFC5246 Section 7.4.3. Server Key Exchange Message
+    """
+    def __init__(self, name):
+        MultiPartField.__init__(
+            self,
+            name,
+            [
+                VectorUInt16Field("dh_p"),
+                VectorUInt16Field("dh_g"),
+                VectorUInt16Field("dh_Ys")
+            ]
+        )
+
+
+class ServerECDHParamsField(MultiPartField):
+    """
+    RFC4492 ECC Cipher Suites for TLS
+    """
+    def __init__(self, name):
+        MultiPartField.__init__(
+            self,
+            name,
+            [
+                ECParametersField("curve_params", None),
+                ECPointField("public")
+            ]
+        )
+
+
+class ECParametersField(Field):
+    def dissect(self, data):
+        """
+        Dissect the field.
+
+        :param bytes data: The data to extract the field value from
+        :return: The rest of the data not used to dissect the field value
+        :rtype: bytes
+        """
+
+        size = struct.calcsize("B")
+        if len(data) < size:
+            raise NotEnoughData(
+                "Not enough data to decode field '%s' value" % self.name
+            )
+
+        curve_type = struct.unpack("B", data[:size])[0]
+        if curve_type == 0x03:
+            self._value = ECParametersNamedCurveField("none")
+            data = self._value.dissect(data)
+        else:
+            raise NotImplementedError(
+                "Decoding of KeyExchange message for curve 0x%.2X not implemented" % curve_type
+            )
+        return data
+
+
+class ECParametersNamedCurveField(MultiPartField):
+    """
+    RFC4492 ECC Cipher Suites for TLS
+    """
+    def __init__(self, name):
+        MultiPartField.__init__(
+            self,
+            name,
+            [
+                UInt8Field("curve_type", 0x03),
+                UInt16Field("namedcurve", 0)
+            ]
+        )
+
+
+class ECPointField(VectorUInt8Field):
+    """
+    RFC4492 ECC Cipher Suites for TLS
+    """
+    pass
 
 
 # Custom

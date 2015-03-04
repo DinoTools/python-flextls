@@ -43,9 +43,9 @@ class ServerNameIndication(Protocol):
         ]
 
     @classmethod
-    def decode(cls, data, connection_state=None, payload_auto_decode=True):
+    def decode(cls, data, connection=None, payload_auto_decode=True):
         obj = cls(
-            connection_state=connection_state
+            connection=connection
         )
         if len(data) > 0:
             data = obj.dissect(data)
@@ -146,9 +146,9 @@ class SessionTicketTLS(Protocol):
         ]
 
     @classmethod
-    def decode(cls, data, connection_state=None, payload_auto_decode=True):
+    def decode(cls, data, connection=None, payload_auto_decode=True):
         obj = cls(
-            connection_state=connection_state
+            connection=connection
         )
         if len(data) > 0:
             data = obj.dissect(data)

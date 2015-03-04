@@ -45,7 +45,8 @@ server_hello_01 = b""
 # Server Hello, Length 77, SSLv3.0
 server_hello_01 += b"0200004d0300"
 # Random
-server_hello_01 += b"5422c711caee59ab1f2146234b5b6a17fb34177605a02852952d8321f9b234d8"
+server_hello_01_randmon = b"5422c711caee59ab1f2146234b5b6a17fb34177605a02852952d8321f9b234d8"
+server_hello_01 += server_hello_01_randmon
 # Session ID Length 32, Data
 server_hello_01 += b"20432d044d99d74289eb663a0eb347e752b1683cf90a409c5f8673b98fb197cde9"
 # Cipher Suite: TLS_DHE_RSA_WITH_AES_256_CBC_SHA (0x0039)
@@ -254,6 +255,11 @@ class TestConnectionServer(object):
     def _change_cipher_spec(self, record):
         assert record.type == 1
 
+    def _connection_state(self, conn):
+        assert conn.state.cipher_suite == 0x0039
+        assert conn.state.client_random is None
+        assert conn.state.server_random == binascii.unhexlify(server_hello_01_randmon)
+
     def _server_certificate_01(self, record):
         assert record.type == 11
 
@@ -342,6 +348,8 @@ class TestConnectionServer(object):
         record = conn.pop_record()
         assert conn.is_empty()
         self._server_hello_done_01(record)
+
+        self._connection_state(conn)
 
         # Change Cipher Spec, SSLv3.0, Length 1
         data = b"1403000001"

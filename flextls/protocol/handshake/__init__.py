@@ -2,10 +2,12 @@
 The SSL/TLS Handshake Protocol
 """
 
+import flextls
 from flextls.field import UInt24Field, UInt16Field, UInt8Field
 from flextls.field import UInt8EnumField
-from flextls.field import VectorUInt8Field
+from flextls.field import VectorUInt8Field, VectorUInt16Field
 from flextls.field import VersionField, RandomField, CipherSuitesField, CompressionMethodsField, ExtensionsField, CipherSuiteField, CompressionMethodField
+from flextls.field import ServerDHParamsField, ServerECDHParamsField
 from flextls.field import CertificateListField
 from flextls.field import SSLv2CipherSuiteField
 from flextls.protocol import Protocol
@@ -218,8 +220,72 @@ class ServerKeyExchange(Protocol):
     def __init__(self, **kwargs):
         Protocol.__init__(self, **kwargs)
         self.payload = None
+        self.fields = []
+
+    def decode_payload(self, data=None, payload_auto_decode=True):
+        if self._connection is None:
+            self.payload = data
+            return b""
+
+        cipher_suite = flextls.registry.tls.cipher_suites.get(self._connection.state.cipher_suite)
+        cls = None
+        if cipher_suite.key_exchange in ("DH_anon", "DH_anon_EXPORT"):
+            cls = ServerKeyExchangeDHAnon
+        elif cipher_suite.key_exchange in ("DHE_RSA", "DHE_RSA_EXPORT"):
+            cls = ServerKeyExchangeDHERSA
+        elif cipher_suite.key_exchange in ("DHE_DSS", "DHE_DSS_EXPORT"):
+            cls = ServerKeyExchangeDHEDSS
+        elif cipher_suite.key_exchange.startswith("ECD",):
+            cls = ServerKeyExchangeECDSA
+
+        if cls is not None:
+            try:
+                (obj, data) = cls.decode(
+                    data,
+                    connection=self._connection
+                )
+            except NotImplementedError:
+                cls = None
+
+        if cls is None:
+            obj = data
+            data = b""
+
+        self.payload = obj
+        return data
+
+
+class ServerKeyExchangeDHAnon(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+
         self.fields = [
-            # ToDo: need a state object to parse the server params
+            ServerDHParamsField("params")
+        ]
+
+
+class ServerKeyExchangeDHERSA(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            ServerDHParamsField("params"),
+            VectorUInt16Field("signed_params")
+        ]
+
+
+class ServerKeyExchangeDHEDSS(ServerKeyExchangeDHERSA):
+    pass
+
+
+class ServerKeyExchangeECDSA(Protocol):
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = None
+        self.fields = [
+            ServerECDHParamsField("params"),
+            VectorUInt16Field("signed_params")
         ]
 
 DTLSv10Handshake.add_payload_type(12, ServerKeyExchange)
