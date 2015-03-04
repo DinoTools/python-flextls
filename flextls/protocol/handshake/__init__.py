@@ -235,7 +235,7 @@ class ServerKeyExchange(Protocol):
             cls = ServerKeyExchangeDHERSA
         elif cipher_suite.key_exchange in ("DHE_DSS", "DHE_DSS_EXPORT"):
             cls = ServerKeyExchangeDHEDSS
-        elif cipher_suite.key_exchange in ("ECDHE_RSA",):
+        elif cipher_suite.key_exchange.startswith("ECD",):
             cls = ServerKeyExchangeECDSA
 
         if cls is not None:
