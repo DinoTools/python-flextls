@@ -40,6 +40,7 @@ Features
   * TLS - Handle fragmentation on the record layer
   * DTLS - Handle fragmented handshake messages
 
+* Handle connection state
 
 Install
 -------
