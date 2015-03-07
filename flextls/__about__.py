@@ -13,7 +13,7 @@ __title__ = "flextls"
 __summary__ = "Pure Python SSL and TLS library"
 __uri__ = "http://github.com/DinoTools/python-flextls"
 
-__version__ = "0.3dev1"
+__version__ = "0.3"
 
 __author__ = "PhiBo (DinoTools)"
 __email__ = ""
