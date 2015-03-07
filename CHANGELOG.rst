@@ -1,14 +1,14 @@
 Changelog
 =========
 
-0.3 - `master`_
-~~~~~~~~~~~~~~~
+0.3 - 2015-03-07
+~~~~~~~~~~~~~~~~
 
-.. note:: This version is not yet released and is under active development.
-
-* Add support for DTLSv 1.0
+* Add support for DTLS 1.0 and DTLS 1.2
 * Add support to handle fragmentation on the record layer (TLS)
 * Add support to handle fragmented handshake messages (DTLS)
+* Add support to handle connection state
+* Add support to decode ServerKeyExchange messages
 * Change class names for consistent names
 * Add additional tests
 * Remove deprecated and unused code
