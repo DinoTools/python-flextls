@@ -2,7 +2,7 @@
 
 """
 from flextls.protocol import Protocol
-from flextls.field import UInt8Field, UInt16Field, VectorListUInt8Field, VectorUInt16Field
+from flextls.field import UInt8Field, UInt16Field, VectorListUInt8Field, VectorUInt8Field, VectorUInt16Field
 from flextls.field import UInt8EnumField, UInt16EnumField, VectorListUInt16Field
 from flextls.field import SignatureAndHashAlgorithmField
 from flextls.field import ServerNameListField
@@ -28,6 +28,25 @@ class Extension(Protocol):
         ]
         self.payload_identifier_field = "type"
         self.payload_length_field = "length"
+
+
+class ApplicationLayerProtocolNegotiation(Protocol):
+    """
+    Handle Application-Layer Protocol Negotiation extension
+
+    * RFC7301
+    """
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.fields = [
+            VectorListUInt16Field(
+                "protocol_name_list",
+                item_class=VectorUInt8Field,
+                item_class_args=[None]
+            ),
+        ]
+
+Extension.add_payload_type(0x0010, ApplicationLayerProtocolNegotiation)
 
 
 class ServerNameIndication(Protocol):
