@@ -148,6 +148,54 @@ ssl_cipher_suites = [
     },
 ]
 
+tls_alpn_protocols = [
+    # Source: http://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+    {
+        "id": b"\x68\x74\x74\x70\x2f\x31\x2e\x31",
+        "name": "HTTP/1.1",
+        "references": ["rfc7230"]
+    },
+    {
+        "id": b"\x73\x70\x64\x79\x2f\x31",
+        "name": "SPDY/1",
+        "references": [],
+    },
+    {
+        "id": b"\x73\x70\x64\x79\x2f\x32",
+        "name": "SPDY/2",
+        "references": [],
+    },
+    {
+        "id": b"\x73\x70\x64\x79\x2f\x33",
+        "name": "SPDY/3",
+        "references": [],
+    },
+    {
+        # stun.turn
+        "id": b"\x73\x74\x75\x6E\x2E\x74\x75\x72\x6E",
+        "name": "TURN",
+        "references": ["RFC7443"],
+    },
+    {
+        # stun.nat-discovery
+        "id": b"\x73\x74\x75\x6E\x2E\x6e\x61\x74\x2d\x64\x69\x73\x63\x6f\x76\x65\x72\x79",
+        "name": "STUN",
+        "references": ["RFC7443"],
+    },
+    {
+        # h2
+        "id": b"\x68\x32",
+        "name": "HTTP/2 over TLS",
+        "references": ["RFC7540"],
+    },
+    {
+        # h2c, reserved for cleartext version, not allowed in TLS ALPN
+        "id": b"\x68\x32\x63",
+        "name": "HTTP/2 over TCP",
+        "references": ["RFC7540"],
+    }
+]
+
 tls_cipher_suites = [
     {
         "id": 0x000,
