@@ -193,7 +193,38 @@ tls_alpn_protocols = [
         "id": b"\x68\x32\x63",
         "name": "HTTP/2 over TCP",
         "references": ["RFC7540"],
-    }
+    },
+    # not standardized
+    {
+        # spdy/3.1
+        "id": b"\x73\x70\x64\x79\x2f\x33\x2e\x31",
+        "name": "SPDY/3.1",
+        "references": [],
+    },
+    {
+        # spdy/4
+        "id": b"\x73\x70\x64\x79\x2f\x34",
+        "name": "SPDY/4",
+        "references": [],
+    },
+    {
+        # http/1.0
+        "id": b"\x68\x74\x74\x70\x2f\x31\x2e\x30",
+        "name": "HTTP/1.0",
+        "references": []
+    },
+    {
+        # h2-14
+        "id": b"\x68\x32\x2d\x31\x34",
+        "name": "H2-14",
+        "references": [],
+    },
+    {
+        # h2-15
+        "id": b"\x68\x32\x2d\x31\x35",
+        "name": "H2-15",
+        "references": [],
+    },
 ]
 
 tls_cipher_suites = [
