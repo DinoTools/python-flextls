@@ -5,7 +5,7 @@ from flextls.protocol import Protocol
 from flextls.field import UInt8Field, UInt16Field, VectorListUInt8Field, VectorUInt8Field, VectorUInt16Field
 from flextls.field import UInt8EnumField, UInt16EnumField, VectorListUInt16Field
 from flextls.field import SignatureAndHashAlgorithmField
-from flextls.field import ServerNameListField
+from flextls.field import ServerNameListField, Field
 
 
 class Extension(Protocol):
@@ -135,6 +135,50 @@ class EcPointFormats(Protocol):
         ]
 
 Extension.add_payload_type(0x000b, EcPointFormats)
+
+
+class NextProtocolNegotiation(Protocol):
+    """
+    Handle Next Protocol Negotiation extension
+
+    * draft-agl-tls-nextprotoneg-04
+    """
+    def __init__(self, **kwargs):
+        Protocol.__init__(self, **kwargs)
+        self.payload = []
+
+    def assemble(self):
+        protocols = []
+        if isinstance(self.payload, (list, tuple)):
+            protocols = self.payload
+
+        data = b""
+        for protocol in protocols:
+            if isinstance(protocol, VectorUInt8Field):
+                data += protocol.assemble()
+            else:
+                obj = VectorUInt8Field(None)
+                obj.value = protocol
+                data += obj.assemble()
+
+        return data
+
+    def decode_payload(self, data=None, payload_auto_decode=True):
+        if data is None:
+            data = self.payload
+
+        if data is None:
+            return False
+
+        self.payload = []
+
+        while len(data) > 0:
+            obj = VectorUInt8Field(None)
+            data = obj.dissect(data)
+            self.payload.append(obj)
+
+
+Extension.add_payload_type(0x3374, NextProtocolNegotiation)
 
 
 class SignatureAlgorithms(Protocol):
