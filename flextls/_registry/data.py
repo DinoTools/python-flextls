@@ -208,10 +208,52 @@ tls_alpn_protocols = [
         "references": [],
     },
     {
+        # spdy/5
+        "id": b"\x73\x70\x64\x79\x2f\x35",
+        "name": "SPDY/5",
+        "references": [],
+    },
+    {
         # http/1.0
         "id": b"\x68\x74\x74\x70\x2f\x31\x2e\x30",
         "name": "HTTP/1.0",
         "references": []
+    },
+    {
+        # h2-09
+        "id": b"\x68\x32\x2d\x30\x39",
+        "name": "H2-09",
+        "references": [],
+    },
+    {
+        # h2-09-emo
+        "id": b"\x68\x32\x2d\x30\x39\x2d\x65\x6d\x6f",
+        "name": "H2-09-emo",
+        "references": ["draft-ietf-httpbis-http2-09"],
+    },
+    {
+        # h2-10
+        "id": b"\x68\x32\x2d\x31\x30",
+        "name": "H2-10",
+        "references": [],
+    },
+    {
+        # h2-11
+        "id": b"\x68\x32\x2d\x31\x31",
+        "name": "H2-11",
+        "references": [],
+    },
+    {
+        # h2-12
+        "id": b"\x68\x32\x2d\x31\x32",
+        "name": "H2-12",
+        "references": [],
+    },
+    {
+        # h2-13
+        "id": b"\x68\x32\x2d\x31\x33",
+        "name": "H2-13",
+        "references": [],
     },
     {
         # h2-14
@@ -223,6 +265,12 @@ tls_alpn_protocols = [
         # h2-15
         "id": b"\x68\x32\x2d\x31\x35",
         "name": "H2-15",
+        "references": [],
+    },
+    {
+        # h2-16
+        "id": b"\x68\x32\x2d\x31\x36",
+        "name": "H2-16",
         "references": [],
     },
 ]
