@@ -29,6 +29,10 @@ class Registry(RegistryNamespace):
     def __init__(self):
         RegistryNamespace.__init__(self)
         self.register(
+            "tls.alpn_protocols",
+            TLSALPNProtocolRegistry()
+        )
+        self.register(
             "tls.cipher_suites",
             TLSCipherSuiteRegistry()
         )
@@ -196,6 +200,15 @@ class SSLv2CipherSuiteRegistry(BaseCipherSuiteRegistry):
             self.load(ssl_cipher_suites, replace=True)
 
 
+class TLSALPNProtocolRegistry(BaseRegistry):
+    def __init__(self, auto_load=True):
+        BaseRegistry.__init__(self)
+        self._item_cls = TLSALPNProtocol
+        if auto_load:
+            from flextls._registry.data import tls_alpn_protocols
+            self.load(tls_alpn_protocols, replace=True)
+
+
 class TLSCipherSuiteRegistry(BaseCipherSuiteRegistry):
     def __init__(self, auto_load=True):
         BaseCipherSuiteRegistry.__init__(self)
@@ -273,6 +286,11 @@ class BaseRegistryItem(object):
         self.name = name
         self.dtls = dtls
         self.references = references
+
+
+class TLSALPNProtocol(BaseRegistryItem):
+    def __init__(self, id, **kwargs):
+        BaseRegistryItem.__init__(self, id, **kwargs)
 
 
 class TLSCompressionMethod(BaseRegistryItem):
